@@ -1,0 +1,29 @@
+{
+  "name": "giantdb",
+  "version": "0.0.0",
+  "description": "Large object database in native JavaScript, with encryption support",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/.bin/mocha --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meyfa/giantdb.git"
+  },
+  "keywords": [
+    "object",
+    "storage",
+    "store",
+    "database",
+    "file",
+    "encryption",
+    "large",
+    "native"
+  ],
+  "author": "Fabian Meyer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/meyfa/giantdb/issues"
+  },
+  "homepage": "https://github.com/meyfa/giantdb"
+}
