@@ -43,6 +43,9 @@ rules:
     no-throw-literal: [warn]
     no-useless-return: [warn]
 
+    # documentation
+    valid-jsdoc: [error]
+
     # deprecations
     no-octal: [error]
     no-octal-escape: [error]
