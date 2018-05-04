@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.1",
+    "stream-buffers": "^3.0.1",
     "writable-wrapper": "^1.0.0"
   }
 }
