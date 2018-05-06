@@ -84,6 +84,7 @@ describe("lib/db.js", function () {
         it("removes items from source", function () {
             const source = new MemoryAdapter({
                 "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
             });
             const obj = new DB(source);
             return obj.remove("foo").then(() => {
@@ -125,8 +126,22 @@ describe("lib/db.js", function () {
         it("loads items from source", function () {
             const obj = new DB(new MemoryAdapter({
                 "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
             }));
             return expect(obj.get("foo")).to.eventually.be.instanceOf(Item);
+        });
+
+        it("loads metadata", function () {
+            const obj = new DB(new MemoryAdapter({
+                "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from('{"foo": "bar", "baz": 42}', "utf8"),
+            }));
+            return obj.get("foo").then((item) => {
+                return expect(item.metadata).to.deep.equal({
+                    foo: "bar",
+                    baz: 42,
+                });
+            });
         });
 
     });
