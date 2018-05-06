@@ -84,7 +84,7 @@ describe("lib/middlewaremanager.js", function () {
                 transformReadable: (str, met, opt, next) => {
                     expect(str).to.equal(stream1);
                     expect(met).to.equal(meta1);
-                    next({
+                    next(null, {
                         metadata: meta2,
                         stream: stream2,
                     });
@@ -114,7 +114,7 @@ describe("lib/middlewaremanager.js", function () {
             const obj = new MiddlewareManager();
             obj.register({
                 transformReadable: (str, met, opt, next) => {
-                    next({
+                    next(null, {
                         metadata: met,
                     });
                 },
@@ -122,6 +122,28 @@ describe("lib/middlewaremanager.js", function () {
 
             return expect(obj.transformReadable(stream, meta, options))
                 .to.eventually.have.property("metadataChanged").that.is.true;
+        });
+
+        it("rejects when the middleware throws", function () {
+            const obj = new MiddlewareManager();
+            obj.register({
+                transformReadable: () => {
+                    throw new Error("oops!");
+                },
+            });
+            return expect(obj.transformReadable(new PassThrough(), {}, {}))
+                .to.eventually.be.rejected;
+        });
+
+        it("rejects when the middleware passes an error", function () {
+            const obj = new MiddlewareManager();
+            obj.register({
+                transformReadable: (str, met, opt, next) => {
+                    next(new Error("oops!"));
+                },
+            });
+            return expect(obj.transformReadable(new PassThrough(), {}, {}))
+                .to.eventually.be.rejected;
         });
 
     });
@@ -191,7 +213,7 @@ describe("lib/middlewaremanager.js", function () {
                 transformWritable: (str, met, opt, next) => {
                     expect(str).to.equal(stream1);
                     expect(met).to.equal(meta1);
-                    next({
+                    next(null, {
                         metadata: meta2,
                         stream: stream2,
                     });
@@ -221,7 +243,7 @@ describe("lib/middlewaremanager.js", function () {
             const obj = new MiddlewareManager();
             obj.register({
                 transformWritable: (str, met, opt, next) => {
-                    next({
+                    next(null, {
                         metadata: met,
                     });
                 },
@@ -229,6 +251,28 @@ describe("lib/middlewaremanager.js", function () {
 
             return expect(obj.transformWritable(stream, meta, options))
                 .to.eventually.have.property("metadataChanged").that.is.true;
+        });
+
+        it("rejects when the middleware throws", function () {
+            const obj = new MiddlewareManager();
+            obj.register({
+                transformWritable: () => {
+                    throw new Error("oops!");
+                },
+            });
+            return expect(obj.transformWritable(new PassThrough(), {}, {}))
+                .to.eventually.be.rejected;
+        });
+
+        it("rejects when the middleware passes an error", function () {
+            const obj = new MiddlewareManager();
+            obj.register({
+                transformWritable: (str, met, opt, next) => {
+                    next(new Error("oops!"));
+                },
+            });
+            return expect(obj.transformWritable(new PassThrough(), {}, {}))
+                .to.eventually.be.rejected;
         });
 
     });
