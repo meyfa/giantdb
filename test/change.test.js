@@ -31,17 +31,11 @@ describe("lib/change.js", function () {
 
     describe("#end()", function () {
 
-        it("invokes the destroyer", function (done) {
+        it("does not destroy", function (done) {
             const out = new DevNull();
-            const obj = new Change("foo", out, () => {}, () => done());
-            obj.end();
-        });
-
-        it("sets 'destroyed' to true", function (done) {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => {}, () => {});
+            const obj = new Change("foo", out, () => {}, () => expect.fail());
             obj.on("finish", function () {
-                expect(obj.destroyed).to.be.true;
+                expect(obj.destroyed).to.be.false;
                 done();
             });
             obj.end();
@@ -93,12 +87,14 @@ describe("lib/change.js", function () {
         });
 
         it("rejects when already destroyed", function (done) {
-            const out = new DevNull();
+            const out = new DevNull({
+                write: (ch, enc, cb) => cb(new Error("oops!")),
+            });
             const obj = new Change("foo", out, () => {}, () => {});
             obj.on("finish", function () {
                 expect(obj.commit()).to.eventually.be.rejected.notify(done);
             });
-            obj.end();
+            obj.end("some data to trigger write error");
         });
 
         it("rejects when the underlying stream fails", function () {
@@ -129,6 +125,16 @@ describe("lib/change.js", function () {
             const obj = new Change("foo", out, () => {}, () => {});
             obj.commit();
             expect(obj.committed).to.be.true;
+        });
+
+        it("resolves even if end() has already been called", function (done) {
+            const out = new DevNull();
+            const obj = new Change("foo", out, () => {}, () => {});
+            obj.on("finish", function () {
+                expect(obj.commit()).to.eventually.be.fulfilled
+                    .notify(done);
+            });
+            obj.end();
         });
 
     });
