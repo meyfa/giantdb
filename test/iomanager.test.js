@@ -44,13 +44,19 @@ describe("lib/iomanager.js", function () {
             };
             const obj = new IOManager(adapter, mockMiddlewareManager());
             return expect(obj.createReadStream("foo"))
-                .to.eventually.equal(expected);
+                .to.eventually.have.property("stream").that.equals(expected);
         });
 
         it("applies the middleware", function () {
             const stream1 = new PassThrough(), stream2 = new PassThrough();
             const meta1 = {meta: true}, meta2 = {meta: true, ordinal: 2};
             const options = {options: true};
+
+            const middlewareResult = {
+                stream: stream2,
+                metadata: meta2,
+                metadataChanged: true,
+            };
 
             const adapter = {
                 createReadStream: () => stream1,
@@ -62,16 +68,12 @@ describe("lib/iomanager.js", function () {
                 expect(meta).to.equal(meta1);
                 expect(opts).to.equal(options);
 
-                return Promise.resolve({
-                    stream: stream2,
-                    metadata: meta2,
-                    metadataChanged: true,
-                });
+                return Promise.resolve(middlewareResult);
             };
 
             const obj = new IOManager(adapter, middlewareManager);
             return expect(obj.createReadStream("foo", meta1, options))
-                .to.eventually.equal(stream2);
+                .to.eventually.deep.equal(middlewareResult);
         });
 
         it("writes metadata if changed by middleware", function (done) {
@@ -109,13 +111,20 @@ describe("lib/iomanager.js", function () {
                 },
             };
             const obj = new IOManager(adapter, mockMiddlewareManager());
-            expect(obj.createWriteStream("foo")).to.eventually.equal(expected);
+            expect(obj.createWriteStream("foo"))
+                .to.eventually.have.property("stream").that.equals(expected);
         });
 
         it("applies the middleware", function () {
             const stream1 = new PassThrough(), stream2 = new PassThrough();
             const meta1 = {meta: true}, meta2 = {meta: true, ordinal: 2};
             const options = {options: true};
+
+            const middlewareResult = {
+                stream: stream2,
+                metadata: meta2,
+                metadataChanged: true,
+            };
 
             const adapter = {
                 createReadStream: () => new PassThrough(),
@@ -127,16 +136,12 @@ describe("lib/iomanager.js", function () {
                 expect(meta).to.equal(meta1);
                 expect(opts).to.equal(options);
 
-                return Promise.resolve({
-                    stream: stream2,
-                    metadata: meta2,
-                    metadataChanged: true,
-                });
+                return Promise.resolve(middlewareResult);
             };
 
             const obj = new IOManager(adapter, middlewareManager);
             return expect(obj.createWriteStream("foo", meta1, options))
-                .to.eventually.equal(stream2);
+                .to.eventually.deep.equal(middlewareResult);
         });
 
         it("writes metadata if changed by middleware", function (done) {

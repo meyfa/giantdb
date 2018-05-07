@@ -4,12 +4,14 @@ const chai = require("chai");
 chai.use(require("chai-as-promised"));
 const expect = chai.expect;
 
+const PassThrough = require("stream").PassThrough;
+
 const Item = require("../lib/item.js");
 
 describe("lib/item.js", function () {
 
     it("has property 'id'", function () {
-        const obj = new Item("foo", {});
+        const obj = new Item("foo", {}, {});
         return expect(obj.id).to.equal("foo");
     });
 
@@ -24,9 +26,13 @@ describe("lib/item.js", function () {
         it("gets a stream from the IO manager", function () {
             const expected = {};
             const manager = {
-                createReadStream: () => Promise.resolve(expected),
+                createReadStream: () => Promise.resolve({
+                    metadata: {},
+                    metadataChanged: false,
+                    stream: expected,
+                }),
             };
-            const obj = new Item("foo", manager);
+            const obj = new Item("foo", manager, {});
             expect(obj.getReadable()).to.eventually.equal(expected);
         });
 
@@ -39,11 +45,30 @@ describe("lib/item.js", function () {
                     expect(meta).to.equal(metadata);
                     expect(options).to.equal(expectedOptions);
                     done();
-                    return Promise.resolve({});
+                    return Promise.resolve({
+                        metadata: {},
+                        metadataChanged: false,
+                        stream: new PassThrough(),
+                    });
                 },
             };
             const obj = new Item("foo", manager, metadata);
             obj.getReadable(expectedOptions);
+        });
+
+        it("updates its metadata when changed", function () {
+            const expected = {meta: true, changed: true};
+            const manager = {
+                createReadStream: () => Promise.resolve({
+                    metadata: expected,
+                    metadataChanged: true,
+                    stream: new PassThrough(),
+                }),
+            };
+            const obj = new Item("foo", manager, {});
+            return obj.getReadable().then(() => {
+                return expect(obj.metadata).to.equal(expected);
+            });
         });
 
     });
@@ -53,9 +78,13 @@ describe("lib/item.js", function () {
         it("gets a stream from the IO manager", function () {
             const expected = {};
             const manager = {
-                createWriteStream: () => Promise.resolve(expected),
+                createWriteStream: () => Promise.resolve({
+                    metadata: {},
+                    metadataChanged: false,
+                    stream: expected,
+                }),
             };
-            const obj = new Item("foo", manager);
+            const obj = new Item("foo", manager, {});
             expect(obj.getWritable()).to.eventually.equal(expected);
         });
 
@@ -68,11 +97,30 @@ describe("lib/item.js", function () {
                     expect(meta).to.equal(metadata);
                     expect(options).to.equal(expectedOptions);
                     done();
-                    return Promise.resolve({});
+                    return Promise.resolve({
+                        metadata: {},
+                        metadataChanged: false,
+                        stream: new PassThrough(),
+                    });
                 },
             };
             const obj = new Item("foo", manager, metadata);
             obj.getWritable(expectedOptions);
+        });
+
+        it("updates its metadata when changed", function () {
+            const expected = {meta: true, changed: true};
+            const manager = {
+                createWriteStream: () => Promise.resolve({
+                    metadata: expected,
+                    metadataChanged: true,
+                    stream: new PassThrough(),
+                }),
+            };
+            const obj = new Item("foo", manager, {});
+            return obj.getWritable().then(() => {
+                return expect(obj.metadata).to.equal(expected);
+            });
         });
 
     });
