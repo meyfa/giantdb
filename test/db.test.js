@@ -131,6 +131,24 @@ describe("lib/db.js", function () {
             return expect(obj.get("foo")).to.eventually.be.instanceOf(Item);
         });
 
+        it("does not load .tmp files", function () {
+            const obj = new DB(new MemoryAdapter({
+                "foo.tmp": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
+                "foo.tmp.json": Buffer.from("{}", "utf8"),
+            }));
+            return expect(obj.get("foo.tmp")).to.eventually.be.rejected;
+        });
+
+        it("does not load .json files", function () {
+            const obj = new DB(new MemoryAdapter({
+                "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
+                "foo.json.json": Buffer.from("{}", "utf8"),
+            }));
+            return expect(obj.get("foo.json")).to.eventually.be.rejected;
+        });
+
         it("loads metadata", function () {
             const obj = new DB(new MemoryAdapter({
                 "foo": Buffer.alloc(0),
