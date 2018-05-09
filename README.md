@@ -25,7 +25,9 @@ system, that directory will be used for file storage.
 
 ## Usage
 
-### Method: db.create()
+### Class: DB
+
+#### Method: db.create()
 
 This prepares a new item for storage. It returns a Promise that resolves to a
 special writable stream to which you can write data. Once done, you call
@@ -45,7 +47,7 @@ db.create().then((change) => {
 });
 ```
 
-### Method: db.get(id)
+#### Method: db.get(id)
 
 This obtains the item with the given id. It returns a Promise that resolves to
 the `Item` instance.
@@ -58,7 +60,7 @@ db.get("d54232abbf9e9dc4e6a8fd72a6e25585").then((item) => {
 });
 ```
 
-### Method: db.remove(id)
+#### Method: db.remove(id)
 
 This removes the item with the given id. It returns a Promise that resolves when
 done. Any data associated with the item will be gone.
@@ -68,6 +70,20 @@ Example:
 ```javascript
 db.remove("d54232abbf9e9dc4e6a8fd72a6e25585").then(() => {
     console.log("done");
+});
+```
+
+#### Method: db.each(callback)
+
+This method iterates over all items. Iteration happens one after the other. If
+the callback returns a Promise, it is awaited before continuing with the next
+item.
+
+Example:
+
+```javascript
+db.each((item) => {
+    console.log(item.id);
 });
 ```
 
