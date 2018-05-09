@@ -1,5 +1,7 @@
 "use strict";
 
+const Promise = require("bluebird");
+
 const chai = require("chai");
 chai.use(require("chai-as-promised"));
 const expect = chai.expect;
@@ -159,6 +161,89 @@ describe("lib/db.js", function () {
                     foo: "bar",
                     baz: 42,
                 });
+            });
+        });
+
+    });
+
+    describe("#each()", function () {
+
+        it("iterates over all items", function (done) {
+            const obj = new DB(new MemoryAdapter({
+                "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
+                "bar": Buffer.alloc(0),
+                "bar.json": Buffer.from("{}", "utf8"),
+            }));
+            const ids = [];
+            obj.each((item) => {
+                ids.push(item.id);
+                if (ids.length >= 2) {
+                    expect(ids).to.have.members(["foo", "bar"]);
+                    done();
+                }
+            });
+        });
+
+        it("returns a Promise", function () {
+            const obj = new DB(new MemoryAdapter({
+                "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
+            }));
+            return expect(obj.each(() => {})).to.eventually.be.fulfilled;
+        });
+
+        it("fulfills the Promise after all iterations are done", function () {
+            const obj = new DB(new MemoryAdapter({
+                "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
+                "bar": Buffer.alloc(0),
+                "bar.json": Buffer.from("{}", "utf8"),
+            }));
+            let iterations = 0;
+            return obj.each(() => ++iterations).then(() => {
+                return expect(iterations).to.equal(2);
+            });
+        });
+
+        it("awaits Promises returned by the callback", function (done) {
+            const obj = new DB(new MemoryAdapter({
+                "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
+                "bar": Buffer.alloc(0),
+                "bar.json": Buffer.from("{}", "utf8"),
+            }));
+            let first = true;
+            let finished = false;
+            obj.each(() => {
+                if (first) {
+                    first = false;
+                    return Promise.delay(20).then(() => {
+                        finished = true;
+                    });
+                }
+                expect(finished).to.be.true;
+                done();
+            });
+        });
+
+        it("allows for element removal", function () {
+            const obj = new DB(new MemoryAdapter({
+                "foo": Buffer.alloc(0),
+                "foo.json": Buffer.from("{}", "utf8"),
+                "bar": Buffer.alloc(0),
+                "bar.json": Buffer.from("{}", "utf8"),
+                "qux": Buffer.alloc(0),
+                "qux.json": Buffer.from("{}", "utf8"),
+            }));
+            let removed = null;
+            obj.each((item) => {
+                if (!removed) {
+                    // pick any item other than the current
+                    removed = item.id === "foo" ? "bar" : "foo";
+                    return obj.remove(removed);
+                }
+                expect(item.id).to.not.equal(removed);
             });
         });
 
