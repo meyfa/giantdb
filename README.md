@@ -92,7 +92,10 @@ db.each((item) => {
 #### Properties
 
 - `item.id`: The item's id string.
-- `item.metadata`: The item's metadata (depending on middleware).
+- `item.metadata`: The item's metadata.
+
+Item metadata can be used by middleware, but is also available for other
+purposes. Call `item.saveMetadata()` to preserve changes.
 
 #### Method: item.getReadable()
 
@@ -119,6 +122,25 @@ Example:
 db.get("d54232abbf9e9dc4e6a8fd72a6e25585").then((item) => {
     return item.getWritable().then((writable) => {
         // write data to the stream
+    });
+});
+```
+
+#### Method: item.saveMetadata()
+
+This saves the item's metadata in its current state. It must be called for the
+metadata to persist after modifications have been made.
+
+Note that the metadata may also be saved on other occurrences (e.g. when
+modified by middleware), but that is not guaranteed.
+
+Example:
+
+```javascript
+db.get("d54232abbf9e9dc4e6a8fd72a6e25585").then((item) => {
+    item.metadata.lastRead = Date.now();
+    return item.saveMetadata().then(() => {
+        console.log("saved");
     });
 });
 ```

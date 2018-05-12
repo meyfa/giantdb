@@ -125,4 +125,33 @@ describe("lib/item.js", function () {
 
     });
 
+    describe("#saveMetadata()", function () {
+
+        it("calls the I/O manager's 'writeMetadata' method", function (done) {
+            const expected = {
+                foo: "bar",
+                baz: 42,
+            };
+            const manager = {
+                writeMetadata: (id, data) => {
+                    expect(id).to.equal("foo");
+                    expect(data).to.equal(expected);
+                    done();
+                    return Promise.resolve();
+                },
+            };
+            const obj = new Item("foo", manager, expected);
+            obj.saveMetadata();
+        });
+
+        it("returns a Promise", function () {
+            const manager = {
+                writeMetadata: () => Promise.resolve(),
+            };
+            const obj = new Item("foo", manager, {});
+            return expect(obj.saveMetadata()).to.eventually.be.fulfilled;
+        });
+
+    });
+
 });
