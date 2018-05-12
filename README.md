@@ -3,7 +3,13 @@
 [![Build Status](https://travis-ci.org/meyfa/giantdb.svg?branch=master)](https://travis-ci.org/meyfa/giantdb)
 [![Maintainability](https://api.codeclimate.com/v1/badges/39ebc35a4b32350a0191/maintainability)](https://codeclimate.com/github/meyfa/giantdb/maintainability)
 
-Large object database in native JavaScript, with encryption support
+GiantDB is a large object store, written entirely in JavaScript. It provides
+managed data storage with a minimal, yet powerful programming interface.
+Promises and streams are used for making this efficient.
+
+Encryption is realized as a middleware module,
+[giantdb-crypto](https://github.com/meyfa/giantdb-crypto). For usage
+instructions please read giantdb-crypto's documentation.
 
 ## Install
 
@@ -144,12 +150,6 @@ db.get("d54232abbf9e9dc4e6a8fd72a6e25585").then((item) => {
     });
 });
 ```
-
-## Encryption
-
-Encryption is realized as a middleware module,
-[giantdb-crypto](https://github.com/meyfa/giantdb-crypto). For usage
-instructions please read giantdb-crypto's documentation.
 
 ## Writing Middleware
 
