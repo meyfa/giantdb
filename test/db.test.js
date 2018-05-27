@@ -8,7 +8,7 @@ const expect = chai.expect;
 
 const Change = require("../lib/change.js");
 const Item = require("../lib/item.js");
-const MemoryAdapter = require("../lib/adapters/memory.js");
+const MemoryAdapter = require("fs-adapters").MemoryAdapter;
 
 const DB = require("../lib/db.js");
 
