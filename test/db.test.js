@@ -14,6 +14,23 @@ const DB = require("../lib/db.js");
 
 describe("lib/db.js", function () {
 
+    describe("constructor", function () {
+
+        it("constructs even when called as a function", function () {
+            expect(DB()).to.be.instanceOf(DB);
+        });
+
+    });
+
+    describe("#use()", function () {
+
+        it("registers middleware", function () {
+            const obj = new DB();
+            obj.use({});
+        });
+
+    });
+
     describe("#create()", function () {
 
         it("returns a promise", function () {

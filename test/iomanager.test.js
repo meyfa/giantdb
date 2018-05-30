@@ -32,6 +32,14 @@ function mockMiddlewareManager() {
 
 describe("lib/iomanager.js", function () {
 
+    describe("constructor", function () {
+
+        it("constructs even when called as a function", function () {
+            expect(IOManager()).to.be.instanceOf(IOManager);
+        });
+
+    });
+
     describe("#createReadStream()", function () {
 
         it("gets a stream from the adapter", function () {
@@ -299,6 +307,36 @@ describe("lib/iomanager.js", function () {
             };
             const obj = new IOManager(adapter, mockMiddlewareManager());
             obj.deleteTemporary("foo");
+        });
+
+        it("ignores missing metadata file", function () {
+            const adapter = {
+                delete: (id) => {
+                    if (id === "foo.json") {
+                        const err = new Error("not found");
+                        err.code = "ENOENT";
+                        return Promise.reject(err);
+                    }
+                    return Promise.resolve();
+                },
+            };
+            const obj = new IOManager(adapter, mockMiddlewareManager());
+            return obj.deleteTemporary("foo");
+        });
+
+        it("rejects for failure to delete metadata", function () {
+            const adapter = {
+                delete: (id) => {
+                    if (id === "foo.json") {
+                        const err = new Error("no permission");
+                        err.code = "EPERM";
+                        return Promise.reject(err);
+                    }
+                    return Promise.resolve();
+                },
+            };
+            const obj = new IOManager(adapter, mockMiddlewareManager());
+            return expect(obj.deleteTemporary("foo")).to.eventually.be.rejected;
         });
 
     });
