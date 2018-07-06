@@ -92,7 +92,8 @@ describe("lib/change.js", function () {
             const out = new DevNull();
             const obj = new Change("foo", out, () => {}, () => {});
             obj.commit();
-            return expect(obj.commit()).to.eventually.be.rejected;
+            return expect(obj.commit()).to.eventually.be
+                .rejectedWith("already committed");
         });
 
         it("rejects when already destroyed", function (done) {
@@ -101,7 +102,8 @@ describe("lib/change.js", function () {
             });
             const obj = new Change("foo", out, () => {}, () => {});
             obj.on("finish", function () {
-                expect(obj.commit()).to.eventually.be.rejected.notify(done);
+                expect(obj.commit()).to.eventually.be
+                    .rejectedWith("already destroyed").notify(done);
             });
             obj.end("some data to trigger write error");
         });
@@ -110,7 +112,7 @@ describe("lib/change.js", function () {
             const out = new PassThrough();
             out.end = () => out.emit("error", new Error("oops!"));
             const obj = new Change("foo", out, () => {}, () => {});
-            return expect(obj.commit()).to.eventually.be.rejected;
+            return expect(obj.commit()).to.eventually.be.rejectedWith("oops!");
         });
 
         it("invokes the destroyer when the underlying stream fails", function (done) {
