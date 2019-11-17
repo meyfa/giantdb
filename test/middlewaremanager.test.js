@@ -10,14 +10,6 @@ const MiddlewareManager = require("../lib/middlewaremanager.js");
 
 describe("lib/middlewaremanager.js", function () {
 
-    describe("constructor", function () {
-
-        it("constructs even when called as a function", function () {
-            expect(MiddlewareManager()).to.be.instanceOf(MiddlewareManager);
-        });
-
-    });
-
     describe("#register()", function () {
 
         it("registers objects", function () {

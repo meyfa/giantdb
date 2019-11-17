@@ -10,14 +10,6 @@ const IdSet = require("../lib/idset.js");
 
 describe("lib/idset.js", function () {
 
-    describe("constructor", function () {
-
-        it("constructs even when called as a function", function () {
-            expect(IdSet(() => ["AB", "CD"])).to.be.instanceOf(IdSet);
-        });
-
-    });
-
     describe("#add()", function () {
 
         it("returns a promise", function () {

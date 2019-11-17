@@ -32,14 +32,6 @@ function mockMiddlewareManager() {
 
 describe("lib/iomanager.js", function () {
 
-    describe("constructor", function () {
-
-        it("constructs even when called as a function", function () {
-            expect(IOManager()).to.be.instanceOf(IOManager);
-        });
-
-    });
-
     describe("#createReadStream()", function () {
 
         it("gets a stream from the adapter", function () {

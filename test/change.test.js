@@ -11,15 +11,6 @@ const Change = require("../lib/change.js");
 
 describe("lib/change.js", function () {
 
-    describe("constructor", function () {
-
-        it("constructs even when called as a function", function () {
-            expect(Change("foo", new DevNull(), () => {}, () => {}))
-                .to.be.instanceOf(Change);
-        });
-
-    });
-
     it("has property 'id'", function () {
         const out = new DevNull();
         const obj = new Change("foo", out, () => {}, () => {});
