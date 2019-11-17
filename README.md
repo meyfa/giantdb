@@ -15,7 +15,7 @@ instructions please read giantdb-crypto's documentation.
 ## Install
 
 ```
-npm install --save giantdb
+npm i giantdb
 ```
 
 ## Setup
