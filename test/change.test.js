@@ -92,7 +92,7 @@ describe("lib/change.js", function () {
                 write: (ch, enc, cb) => cb(new Error("oops!")),
             });
             const obj = new Change("foo", out, () => {}, () => {});
-            obj.on("finish", function () {
+            obj.on("error", function () {
                 expect(obj.commit()).to.eventually.be
                     .rejectedWith("already destroyed").notify(done);
             });
