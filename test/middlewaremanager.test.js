@@ -1,280 +1,262 @@
-"use strict";
+'use strict'
 
-const chai = require("chai");
-chai.use(require("chai-as-promised"));
-const expect = chai.expect;
+const chai = require('chai')
+chai.use(require('chai-as-promised'))
+const expect = chai.expect
 
-const PassThrough = require("stream").PassThrough;
+const PassThrough = require('stream').PassThrough
 
-const MiddlewareManager = require("../lib/middlewaremanager.js");
+const MiddlewareManager = require('../lib/middlewaremanager.js')
 
-describe("lib/middlewaremanager.js", function () {
+describe('lib/middlewaremanager.js', function () {
+  describe('#register()', function () {
+    it('registers objects', function () {
+      const obj = new MiddlewareManager()
+      obj.register({})
+    })
+  })
 
-    describe("#register()", function () {
+  describe('#transformReadable()', function () {
+    it("calls the middleware's method", function (done) {
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformReadable (stream, meta, options, next) {
+          next()
+          done()
+        }
+      })
+      obj.transformReadable(new PassThrough(), {}, {})
+    })
 
-        it("registers objects", function () {
-            const obj = new MiddlewareManager();
-            obj.register({});
-        });
+    it('passes the arguments to the middleware', function (done) {
+      const stream = new PassThrough()
+      const meta = { meta: true }
+      const options = { options: true }
 
-    });
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformReadable (str, met, opt, next) {
+          expect(str).to.equal(stream)
+          expect(met).to.equal(meta)
+          expect(opt).to.equal(options)
+          next()
+          done()
+        }
+      })
+      obj.transformReadable(stream, meta, options)
+    })
 
-    describe("#transformReadable()", function () {
+    it('ignores middleware missing the method', function () {
+      const obj = new MiddlewareManager()
+      obj.register({})
+      obj.register({ transformReadable: null })
+      return expect(obj.transformReadable(new PassThrough(), {}, {}))
+        .to.eventually.be.fulfilled
+    })
 
-        it("calls the middleware's method", function (done) {
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformReadable: (stream, meta, options, next) => {
-                    next();
-                    done();
-                },
-            });
-            obj.transformReadable(new PassThrough(), {}, {});
-        });
+    it('resolves to a result object', function () {
+      const stream = new PassThrough()
+      const meta = { meta: true }
+      const options = { options: true }
 
-        it("passes the arguments to the middleware", function (done) {
-            const stream = new PassThrough();
-            const meta = {meta: true};
-            const options = {options: true};
+      const obj = new MiddlewareManager()
+      return expect(obj.transformReadable(stream, meta, options))
+        .to.eventually.be.an('object').that.deep.equals({
+          stream: stream,
+          metadata: meta,
+          metadataChanged: false
+        })
+    })
 
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformReadable: (str, met, opt, next) => {
-                    expect(str).to.equal(stream);
-                    expect(met).to.equal(meta);
-                    expect(opt).to.equal(options);
-                    next();
-                    done();
-                },
-            });
-            obj.transformReadable(stream, meta, options);
-        });
+    it("updates 'stream' and 'metadata'", function () {
+      const stream1 = new PassThrough()
+      const stream2 = new PassThrough()
+      const meta1 = { meta: true }
+      const meta2 = { meta: 2, ordinal: 2 }
+      const options = { options: true }
 
-        it("ignores middleware missing the method", function () {
-            const obj = new MiddlewareManager();
-            obj.register({});
-            obj.register({
-                transformReadable: null,
-            });
-            return expect(obj.transformReadable(new PassThrough(), {}, {}))
-                .to.eventually.be.fulfilled;
-        });
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformReadable (str, met, opt, next) {
+          expect(str).to.equal(stream1)
+          expect(met).to.equal(meta1)
+          next(null, { metadata: meta2, stream: stream2 })
+        }
+      })
+      obj.register({
+        transformReadable (str, met, opt, next) {
+          expect(str).to.equal(stream2)
+          expect(met).to.equal(meta2)
+          next()
+        }
+      })
 
-        it("resolves to a result object", function () {
-            const stream = new PassThrough();
-            const meta = {meta: true};
-            const options = {options: true};
+      return expect(obj.transformReadable(stream1, meta1, options))
+        .to.eventually.deep.equal({
+          metadataChanged: true,
+          stream: stream2,
+          metadata: meta2
+        })
+    })
 
-            const obj = new MiddlewareManager();
-            return expect(obj.transformReadable(stream, meta, options))
-                .to.eventually.be.an("object").that.deep.equals({
-                    stream: stream,
-                    metadata: meta,
-                    metadataChanged: false,
-                });
-        });
+    it('sets metadataChanged when it was modified', function () {
+      const stream = new PassThrough()
+      const meta = { meta: true }
+      const options = { options: true }
 
-        it("updates 'stream' and 'metadata'", function () {
-            const stream1 = new PassThrough(), stream2 = new PassThrough();
-            const meta1 = {meta: true}, meta2 = {meta: 2, ordinal: 2};
-            const options = {options: true};
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformReadable (str, met, opt, next) {
+          next(null, { metadata: met })
+        }
+      })
 
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformReadable: (str, met, opt, next) => {
-                    expect(str).to.equal(stream1);
-                    expect(met).to.equal(meta1);
-                    next(null, {
-                        metadata: meta2,
-                        stream: stream2,
-                    });
-                },
-            });
-            obj.register({
-                transformReadable: (str, met, opt, next) => {
-                    expect(str).to.equal(stream2);
-                    expect(met).to.equal(meta2);
-                    next();
-                },
-            });
+      return expect(obj.transformReadable(stream, meta, options))
+        .to.eventually.have.property('metadataChanged').that.is.true
+    })
 
-            return expect(obj.transformReadable(stream1, meta1, options))
-                .to.eventually.deep.equal({
-                    metadataChanged: true,
-                    stream: stream2,
-                    metadata: meta2,
-                });
-        });
+    it('rejects when the middleware throws', function () {
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformReadable () {
+          throw new Error('oops!')
+        }
+      })
+      return expect(obj.transformReadable(new PassThrough(), {}, {}))
+        .to.eventually.be.rejected
+    })
 
-        it("sets metadataChanged when it was modified", function () {
-            const stream = new PassThrough();
-            const meta = {meta: true};
-            const options = {options: true};
+    it('rejects when the middleware passes an error', function () {
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformReadable (str, met, opt, next) {
+          next(new Error('oops!'))
+        }
+      })
+      return expect(obj.transformReadable(new PassThrough(), {}, {}))
+        .to.eventually.be.rejected
+    })
+  })
 
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformReadable: (str, met, opt, next) => {
-                    next(null, {
-                        metadata: met,
-                    });
-                },
-            });
+  describe('#transformWritable()', function () {
+    it("calls the middleware's method", function (done) {
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformWritable (stream, meta, options, next) {
+          next()
+          done()
+        }
+      })
+      obj.transformWritable(new PassThrough(), {}, {})
+    })
 
-            return expect(obj.transformReadable(stream, meta, options))
-                .to.eventually.have.property("metadataChanged").that.is.true;
-        });
+    it('passes the arguments to the middleware', function (done) {
+      const stream = new PassThrough()
+      const meta = { meta: true }
+      const options = { options: true }
 
-        it("rejects when the middleware throws", function () {
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformReadable: () => {
-                    throw new Error("oops!");
-                },
-            });
-            return expect(obj.transformReadable(new PassThrough(), {}, {}))
-                .to.eventually.be.rejected;
-        });
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformWritable (str, met, opt, next) {
+          expect(str).to.equal(stream)
+          expect(met).to.equal(meta)
+          expect(opt).to.equal(options)
+          next()
+          done()
+        }
+      })
+      obj.transformWritable(stream, meta, options)
+    })
 
-        it("rejects when the middleware passes an error", function () {
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformReadable: (str, met, opt, next) => {
-                    next(new Error("oops!"));
-                },
-            });
-            return expect(obj.transformReadable(new PassThrough(), {}, {}))
-                .to.eventually.be.rejected;
-        });
+    it('ignores middleware missing the method', function () {
+      const obj = new MiddlewareManager()
+      obj.register({})
+      obj.register({ transformWritable: null })
+      return expect(obj.transformWritable(new PassThrough(), {}, {}))
+        .to.eventually.be.fulfilled
+    })
 
-    });
+    it('resolves to a result object', function () {
+      const stream = new PassThrough()
+      const meta = { meta: true }
+      const options = { options: true }
 
-    describe("#transformWritable()", function () {
+      const obj = new MiddlewareManager()
+      return expect(obj.transformWritable(stream, meta, options))
+        .to.eventually.be.an('object').that.deep.equals({
+          stream: stream,
+          metadata: meta,
+          metadataChanged: false
+        })
+    })
 
-        it("calls the middleware's method", function (done) {
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformWritable: (stream, meta, options, next) => {
-                    next();
-                    done();
-                },
-            });
-            obj.transformWritable(new PassThrough(), {}, {});
-        });
+    it("updates 'stream' and 'metadata'", function () {
+      const stream1 = new PassThrough()
+      const stream2 = new PassThrough()
+      const meta1 = { meta: true }
+      const meta2 = { meta: 2, ordinal: 2 }
+      const options = { options: true }
 
-        it("passes the arguments to the middleware", function (done) {
-            const stream = new PassThrough();
-            const meta = {meta: true};
-            const options = {options: true};
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformWritable (str, met, opt, next) {
+          expect(str).to.equal(stream1)
+          expect(met).to.equal(meta1)
+          next(null, { metadata: meta2, stream: stream2 })
+        }
+      })
+      obj.register({
+        transformWritable (str, met, opt, next) {
+          expect(str).to.equal(stream2)
+          expect(met).to.equal(meta2)
+          next()
+        }
+      })
 
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformWritable: (str, met, opt, next) => {
-                    expect(str).to.equal(stream);
-                    expect(met).to.equal(meta);
-                    expect(opt).to.equal(options);
-                    next();
-                    done();
-                },
-            });
-            obj.transformWritable(stream, meta, options);
-        });
+      return expect(obj.transformWritable(stream1, meta1, options))
+        .to.eventually.deep.equal({
+          metadataChanged: true,
+          stream: stream2,
+          metadata: meta2
+        })
+    })
 
-        it("ignores middleware missing the method", function () {
-            const obj = new MiddlewareManager();
-            obj.register({});
-            obj.register({
-                transformWritable: null,
-            });
-            return expect(obj.transformWritable(new PassThrough(), {}, {}))
-                .to.eventually.be.fulfilled;
-        });
+    it('sets metadataChanged when it was modified', function () {
+      const stream = new PassThrough()
+      const meta = { meta: true }
+      const options = { options: true }
 
-        it("resolves to a result object", function () {
-            const stream = new PassThrough();
-            const meta = {meta: true};
-            const options = {options: true};
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformWritable (str, met, opt, next) {
+          next(null, { metadata: met })
+        }
+      })
 
-            const obj = new MiddlewareManager();
-            return expect(obj.transformWritable(stream, meta, options))
-                .to.eventually.be.an("object").that.deep.equals({
-                    stream: stream,
-                    metadata: meta,
-                    metadataChanged: false,
-                });
-        });
+      return expect(obj.transformWritable(stream, meta, options))
+        .to.eventually.have.property('metadataChanged').that.is.true
+    })
 
-        it("updates 'stream' and 'metadata'", function () {
-            const stream1 = new PassThrough(), stream2 = new PassThrough();
-            const meta1 = {meta: true}, meta2 = {meta: 2, ordinal: 2};
-            const options = {options: true};
+    it('rejects when the middleware throws', function () {
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformWritable () {
+          throw new Error('oops!')
+        }
+      })
+      return expect(obj.transformWritable(new PassThrough(), {}, {}))
+        .to.eventually.be.rejected
+    })
 
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformWritable: (str, met, opt, next) => {
-                    expect(str).to.equal(stream1);
-                    expect(met).to.equal(meta1);
-                    next(null, {
-                        metadata: meta2,
-                        stream: stream2,
-                    });
-                },
-            });
-            obj.register({
-                transformWritable: (str, met, opt, next) => {
-                    expect(str).to.equal(stream2);
-                    expect(met).to.equal(meta2);
-                    next();
-                },
-            });
-
-            return expect(obj.transformWritable(stream1, meta1, options))
-                .to.eventually.deep.equal({
-                    metadataChanged: true,
-                    stream: stream2,
-                    metadata: meta2,
-                });
-        });
-
-        it("sets metadataChanged when it was modified", function () {
-            const stream = new PassThrough();
-            const meta = {meta: true};
-            const options = {options: true};
-
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformWritable: (str, met, opt, next) => {
-                    next(null, {
-                        metadata: met,
-                    });
-                },
-            });
-
-            return expect(obj.transformWritable(stream, meta, options))
-                .to.eventually.have.property("metadataChanged").that.is.true;
-        });
-
-        it("rejects when the middleware throws", function () {
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformWritable: () => {
-                    throw new Error("oops!");
-                },
-            });
-            return expect(obj.transformWritable(new PassThrough(), {}, {}))
-                .to.eventually.be.rejected;
-        });
-
-        it("rejects when the middleware passes an error", function () {
-            const obj = new MiddlewareManager();
-            obj.register({
-                transformWritable: (str, met, opt, next) => {
-                    next(new Error("oops!"));
-                },
-            });
-            return expect(obj.transformWritable(new PassThrough(), {}, {}))
-                .to.eventually.be.rejected;
-        });
-
-    });
-
-});
+    it('rejects when the middleware passes an error', function () {
+      const obj = new MiddlewareManager()
+      obj.register({
+        transformWritable (str, met, opt, next) {
+          next(new Error('oops!'))
+        }
+      })
+      return expect(obj.transformWritable(new PassThrough(), {}, {}))
+        .to.eventually.be.rejected
+    })
+  })
+})

@@ -1,144 +1,137 @@
-"use strict";
+'use strict'
 
-const chai = require("chai");
-chai.use(require("chai-as-promised"));
-const expect = chai.expect;
+const chai = require('chai')
+chai.use(require('chai-as-promised'))
+const expect = chai.expect
 
-const PassThrough = require("stream").PassThrough;
-const DevNull = require("dev-null");
+const PassThrough = require('stream').PassThrough
+const DevNull = require('dev-null')
 
-const Change = require("../lib/change.js");
+const Change = require('../lib/change.js')
 
-describe("lib/change.js", function () {
+describe('lib/change.js', function () {
+  it("has property 'id'", function () {
+    const out = new DevNull()
+    const obj = new Change('foo', out, () => {}, () => {})
+    return expect(obj.id).to.equal('foo')
+  })
 
-    it("has property 'id'", function () {
-        const out = new DevNull();
-        const obj = new Change("foo", out, () => {}, () => {});
-        return expect(obj.id).to.equal("foo");
-    });
+  it("has property 'committed'", function () {
+    const out = new DevNull()
+    const obj = new Change('foo', out, () => {}, () => {})
+    return expect(obj.committed).to.be.false
+  })
 
-    it("has property 'committed'", function () {
-        const out = new DevNull();
-        const obj = new Change("foo", out, () => {}, () => {});
-        return expect(obj.committed).to.be.false;
-    });
+  it("has property 'destroyed'", function () {
+    const out = new DevNull()
+    const obj = new Change('foo', out, () => {}, () => {})
+    return expect(obj.destroyed).to.be.false
+  })
 
-    it("has property 'destroyed'", function () {
-        const out = new DevNull();
-        const obj = new Change("foo", out, () => {}, () => {});
-        return expect(obj.destroyed).to.be.false;
-    });
+  describe('#end()', function () {
+    it('does not destroy', function (done) {
+      const out = new DevNull()
+      const obj = new Change('foo', out, () => {}, () => expect.fail())
+      obj.on('finish', function () {
+        expect(obj.destroyed).to.be.false
+        done()
+      })
+      obj.end()
+    })
+  })
 
-    describe("#end()", function () {
+  describe('#commit()', function () {
+    it('ends itself', function (done) {
+      const out = new DevNull()
+      const obj = new Change('foo', out, () => {}, () => {})
+      obj.on('finish', done)
+      obj.commit()
+    })
 
-        it("does not destroy", function (done) {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => {}, () => expect.fail());
-            obj.on("finish", function () {
-                expect(obj.destroyed).to.be.false;
-                done();
-            });
-            obj.end();
-        });
+    it('returns a promise', function () {
+      const out = new DevNull()
+      const obj = new Change('foo', out, () => {}, () => {})
+      return expect(obj.commit()).to.eventually.be.fulfilled
+    })
 
-    });
+    it('invokes the committer', function (done) {
+      const out = new DevNull()
+      const obj = new Change('foo', out, () => done(), () => {})
+      obj.commit()
+    })
 
-    describe("#commit()", function () {
+    it('passes the id to the committer', function (done) {
+      const out = new DevNull()
+      const obj = new Change('foo', out, (id) => {
+        expect(id).to.equal('foo')
+        done()
+      }, () => {})
+      obj.commit()
+    })
 
-        it("ends itself", function (done) {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => {}, () => {});
-            obj.on("finish", done);
-            obj.commit();
-        });
+    it("resolves to the committer's return value", function () {
+      const out = new DevNull()
+      const obj = new Change('foo', out, () => 42, () => {})
+      return expect(obj.commit()).to.eventually.equal(42)
+    })
 
-        it("returns a promise", function () {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => {}, () => {});
-            return expect(obj.commit()).to.eventually.be.fulfilled;
-        });
+    it('rejects when called twice', function () {
+      const out = new DevNull()
+      const obj = new Change('foo', out, () => {}, () => {})
+      obj.commit()
+      return expect(obj.commit()).to.eventually.be
+        .rejectedWith('already committed')
+    })
 
-        it("invokes the committer", function (done) {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => done(), () => {});
-            obj.commit();
-        });
+    it('rejects when already destroyed', function (done) {
+      const out = new DevNull({
+        write: (ch, enc, cb) => cb(new Error('oops!'))
+      })
+      const obj = new Change('foo', out, () => {}, () => {})
+      obj.on('error', function () {
+        expect(obj.commit()).to.eventually.be
+          .rejectedWith('already destroyed').notify(done)
+      })
+      obj.end('some data to trigger write error')
+    })
 
-        it("passes the id to the committer", function (done) {
-            const out = new DevNull();
-            const obj = new Change("foo", out, (id) => {
-                expect(id).to.equal("foo");
-                done();
-            }, () => {});
-            obj.commit();
-        });
+    it('rejects when the underlying stream fails', function () {
+      const out = new PassThrough()
+      out.end = () => out.emit('error', new Error('oops!'))
+      const obj = new Change('foo', out, () => {}, () => {})
+      return expect(obj.commit()).to.eventually.be.rejectedWith('oops!')
+    })
 
-        it("resolves to the committer's return value", function () {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => 42, () => {});
-            return expect(obj.commit()).to.eventually.equal(42);
-        });
+    it('invokes the destroyer when the underlying stream fails', function (done) {
+      const out = new PassThrough()
+      out.end = () => out.emit('error', new Error('oops!'))
+      const obj = new Change('foo', out, () => {}, () => done())
+      obj.commit().catch(() => {})
+    })
 
-        it("rejects when called twice", function () {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => {}, () => {});
-            obj.commit();
-            return expect(obj.commit()).to.eventually.be
-                .rejectedWith("already committed");
-        });
+    it("sets 'destroyed' to true when the underlying stream fails", function () {
+      const out = new PassThrough()
+      out.end = () => out.emit('error', new Error('oops!'))
+      const obj = new Change('foo', out, () => {}, () => {})
+      return obj.commit().catch(() => {
+        return expect(obj.destroyed).to.be.true
+      })
+    })
 
-        it("rejects when already destroyed", function (done) {
-            const out = new DevNull({
-                write: (ch, enc, cb) => cb(new Error("oops!")),
-            });
-            const obj = new Change("foo", out, () => {}, () => {});
-            obj.on("error", function () {
-                expect(obj.commit()).to.eventually.be
-                    .rejectedWith("already destroyed").notify(done);
-            });
-            obj.end("some data to trigger write error");
-        });
+    it("sets 'committed' to true", function () {
+      const out = new DevNull()
+      const obj = new Change('foo', out, () => {}, () => {})
+      obj.commit()
+      expect(obj.committed).to.be.true
+    })
 
-        it("rejects when the underlying stream fails", function () {
-            const out = new PassThrough();
-            out.end = () => out.emit("error", new Error("oops!"));
-            const obj = new Change("foo", out, () => {}, () => {});
-            return expect(obj.commit()).to.eventually.be.rejectedWith("oops!");
-        });
-
-        it("invokes the destroyer when the underlying stream fails", function (done) {
-            const out = new PassThrough();
-            out.end = () => out.emit("error", new Error("oops!"));
-            const obj = new Change("foo", out, () => {}, () => done());
-            obj.commit().catch(() => {});
-        });
-
-        it("sets 'destroyed' to true when the underlying stream fails", function () {
-            const out = new PassThrough();
-            out.end = () => out.emit("error", new Error("oops!"));
-            const obj = new Change("foo", out, () => {}, () => {});
-            return obj.commit().catch(() => {
-                return expect(obj.destroyed).to.be.true;
-            });
-        });
-
-        it("sets 'committed' to true", function () {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => {}, () => {});
-            obj.commit();
-            expect(obj.committed).to.be.true;
-        });
-
-        it("resolves even if end() has already been called", function (done) {
-            const out = new DevNull();
-            const obj = new Change("foo", out, () => {}, () => {});
-            obj.on("finish", function () {
-                expect(obj.commit()).to.eventually.be.fulfilled
-                    .notify(done);
-            });
-            obj.end();
-        });
-
-    });
-
-});
+    it('resolves even if end() has already been called', function (done) {
+      const out = new DevNull()
+      const obj = new Change('foo', out, () => {}, () => {})
+      obj.on('finish', function () {
+        expect(obj.commit()).to.eventually.be.fulfilled.notify(done)
+      })
+      obj.end()
+    })
+  })
+})

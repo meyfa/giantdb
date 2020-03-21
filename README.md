@@ -21,9 +21,9 @@ npm i giantdb
 ## Setup
 
 ```javascript
-const GiantDB = require("giantdb");
+const GiantDB = require('giantdb')
 
-const db = new GiantDB(/* source */);
+const db = new GiantDB(/* source */)
 ```
 
 The `source` argument is optional. If it is not provided, GiantDB will use an
@@ -44,14 +44,14 @@ Example:
 
 ```javascript
 db.create().then((change) => {
-    change.write("hello world", "utf8");
-    // you can also .pipe(change), for example
+  change.write('hello world', 'utf8')
+  // you can also .pipe(change), for example
 
-    return change.commit();
+  return change.commit()
 }).then((item) => {
-    // the item is now stored
-    console.log(item.id);
-});
+  // the item is now stored
+  console.log(item.id)
+})
 ```
 
 #### Method: db.get(id)
@@ -62,9 +62,9 @@ the `Item` instance.
 Example:
 
 ```javascript
-db.get("d54232abbf9e9dc4e6a8fd72a6e25585").then((item) => {
-    console.log(item.id); // "d54232abbf9e9dc4e6a8fd72a6e25585"
-});
+db.get('d54232abbf9e9dc4e6a8fd72a6e25585').then((item) => {
+  console.log(item.id) // 'd54232abbf9e9dc4e6a8fd72a6e25585'
+})
 ```
 
 #### Method: db.remove(id)
@@ -75,9 +75,9 @@ done. Any data associated with the item will be gone.
 Example:
 
 ```javascript
-db.remove("d54232abbf9e9dc4e6a8fd72a6e25585").then(() => {
-    console.log("done");
-});
+db.remove('d54232abbf9e9dc4e6a8fd72a6e25585').then(() => {
+  console.log('done')
+})
 ```
 
 #### Method: db.each(callback)
@@ -89,9 +89,7 @@ item.
 Example:
 
 ```javascript
-db.each((item) => {
-    console.log(item.id);
-});
+db.each((item) => console.log(item.id))
 ```
 
 ### Class: Item
@@ -111,11 +109,11 @@ This obtains a read stream for reading the item's data. It returns a Promise.
 Example:
 
 ```javascript
-db.get("d54232abbf9e9dc4e6a8fd72a6e25585").then((item) => {
-    return item.getReadable().then((readable) => {
-        // read data from the stream
-    });
-});
+db.get('d54232abbf9e9dc4e6a8fd72a6e25585').then((item) => {
+  return item.getReadable().then((readable) => {
+    // read data from the stream
+  })
+})
 ```
 
 #### Method: item.getWritable()
@@ -126,11 +124,11 @@ contents. It returns a Promise.
 Example:
 
 ```javascript
-db.get("d54232abbf9e9dc4e6a8fd72a6e25585").then((item) => {
-    return item.getWritable().then((writable) => {
-        // write data to the stream
-    });
-});
+db.get('d54232abbf9e9dc4e6a8fd72a6e25585').then((item) => {
+  return item.getWritable().then((writable) => {
+    // write data to the stream
+  })
+})
 ```
 
 #### Method: item.saveMetadata()
@@ -144,12 +142,12 @@ modified by middleware), but that is not guaranteed.
 Example:
 
 ```javascript
-db.get("d54232abbf9e9dc4e6a8fd72a6e25585").then((item) => {
-    item.metadata.lastRead = Date.now();
-    return item.saveMetadata().then(() => {
-        console.log("saved");
-    });
-});
+db.get('d54232abbf9e9dc4e6a8fd72a6e25585').then((item) => {
+  item.metadata.lastRead = Date.now()
+  return item.saveMetadata().then(() => {
+    console.log('saved')
+  })
+})
 ```
 
 ## Writing Middleware
@@ -189,9 +187,9 @@ like this:
 
 ```javascript
 next(null, {
-    stream: myNewReadStream, // if stream changed
-    metadata: myNewMetadata, // if metadata changed
-});
+  stream: myNewReadStream, // if stream changed
+  metadata: myNewMetadata // if metadata changed
+})
 ```
 
 #### transformWritable
@@ -218,7 +216,7 @@ like this:
 
 ```javascript
 next(null, {
-    stream: myNewWriteStream, // if stream changed
-    metadata: myNewMetadata, // if metadata changed
-});
+  stream: myNewWriteStream, // if stream changed
+  metadata: myNewMetadata // if metadata changed
+})
 ```
