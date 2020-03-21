@@ -1,10 +1,10 @@
 'use strict'
 
-const Promise = require('bluebird')
-
 const chai = require('chai')
 chai.use(require('chai-as-promised'))
 const expect = chai.expect
+
+const delay = require('delay')
 
 const Change = require('../lib/change.js')
 const Item = require('../lib/item.js')
@@ -208,15 +208,15 @@ describe('lib/db.js', function () {
       }))
       let first = true
       let finished = false
-      obj.each(() => {
+      obj.each(async () => {
         if (first) {
           first = false
-          return Promise.delay(20).then(() => {
-            finished = true
-          })
+          await delay(20)
+          finished = true
+        } else {
+          expect(finished).to.be.true
+          done()
         }
-        expect(finished).to.be.true
-        done()
       })
     })
 

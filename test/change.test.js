@@ -60,15 +60,6 @@ describe('lib/change.js', function () {
       obj.commit()
     })
 
-    it('passes the id to the committer', function (done) {
-      const out = new DevNull()
-      const obj = new Change('foo', out, (id) => {
-        expect(id).to.equal('foo')
-        done()
-      }, () => {})
-      obj.commit()
-    })
-
     it("resolves to the committer's return value", function () {
       const out = new DevNull()
       const obj = new Change('foo', out, () => 42, () => {})
