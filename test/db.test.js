@@ -8,7 +8,7 @@ const delay = require('delay')
 
 const Change = require('../lib/change.js')
 const Item = require('../lib/item.js')
-const MemoryAdapter = require('fs-adapters').MemoryAdapter
+const { MemoryAdapter } = require('fs-adapters')
 
 const DB = require('../lib/db.js')
 
@@ -86,7 +86,7 @@ describe('lib/db.js', function () {
     it('removes items from source', function () {
       const source = new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8')
+        'foo.json': Buffer.from('{}')
       })
       const obj = new DB(source)
       return obj.remove('foo').then(() => {
@@ -123,7 +123,7 @@ describe('lib/db.js', function () {
     it('loads items from source', function () {
       const obj = new DB(new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8')
+        'foo.json': Buffer.from('{}')
       }))
       return expect(obj.get('foo')).to.eventually.be.instanceOf(Item)
     })
@@ -131,8 +131,8 @@ describe('lib/db.js', function () {
     it('does not load .tmp files', function () {
       const obj = new DB(new MemoryAdapter({
         'foo.tmp': Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8'),
-        'foo.tmp.json': Buffer.from('{}', 'utf8')
+        'foo.json': Buffer.from('{}'),
+        'foo.tmp.json': Buffer.from('{}')
       }))
       return expect(obj.get('foo.tmp')).to.eventually.be.rejected
     })
@@ -140,8 +140,8 @@ describe('lib/db.js', function () {
     it('does not load .json files', function () {
       const obj = new DB(new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8'),
-        'foo.json.json': Buffer.from('{}', 'utf8')
+        'foo.json': Buffer.from('{}'),
+        'foo.json.json': Buffer.from('{}')
       }))
       return expect(obj.get('foo.json')).to.eventually.be.rejected
     })
@@ -149,7 +149,7 @@ describe('lib/db.js', function () {
     it('loads metadata', function () {
       const obj = new DB(new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{"foo": "bar", "baz": 42}', 'utf8')
+        'foo.json': Buffer.from('{"foo": "bar", "baz": 42}')
       }))
       return obj.get('foo').then((item) => {
         return expect(item.metadata).to.deep.equal({
@@ -164,9 +164,9 @@ describe('lib/db.js', function () {
     it('iterates over all items', function (done) {
       const obj = new DB(new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8'),
+        'foo.json': Buffer.from('{}'),
         bar: Buffer.alloc(0),
-        'bar.json': Buffer.from('{}', 'utf8')
+        'bar.json': Buffer.from('{}')
       }))
       const ids = []
       obj.each((item) => {
@@ -181,7 +181,7 @@ describe('lib/db.js', function () {
     it('returns a Promise', function () {
       const obj = new DB(new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8')
+        'foo.json': Buffer.from('{}')
       }))
       return expect(obj.each(() => {})).to.eventually.be.fulfilled
     })
@@ -189,9 +189,9 @@ describe('lib/db.js', function () {
     it('fulfills the Promise after all iterations are done', function () {
       const obj = new DB(new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8'),
+        'foo.json': Buffer.from('{}'),
         bar: Buffer.alloc(0),
-        'bar.json': Buffer.from('{}', 'utf8')
+        'bar.json': Buffer.from('{}')
       }))
       let iterations = 0
       return obj.each(() => ++iterations).then(() => {
@@ -202,9 +202,9 @@ describe('lib/db.js', function () {
     it('awaits Promises returned by the callback', function (done) {
       const obj = new DB(new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8'),
+        'foo.json': Buffer.from('{}'),
         bar: Buffer.alloc(0),
-        'bar.json': Buffer.from('{}', 'utf8')
+        'bar.json': Buffer.from('{}')
       }))
       let first = true
       let finished = false
@@ -223,11 +223,11 @@ describe('lib/db.js', function () {
     it('allows for element removal', function () {
       const obj = new DB(new MemoryAdapter({
         foo: Buffer.alloc(0),
-        'foo.json': Buffer.from('{}', 'utf8'),
+        'foo.json': Buffer.from('{}'),
         bar: Buffer.alloc(0),
-        'bar.json': Buffer.from('{}', 'utf8'),
+        'bar.json': Buffer.from('{}'),
         qux: Buffer.alloc(0),
-        'qux.json': Buffer.from('{}', 'utf8')
+        'qux.json': Buffer.from('{}')
       }))
       let removed = null
       obj.each((item) => {

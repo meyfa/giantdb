@@ -48,7 +48,6 @@
     "nyc": "^15.1.0"
   },
   "dependencies": {
-    "JSONStream": "^1.3.5",
     "fs-adapters": "^5.0.0",
     "writable-wrapper": "^2.1.0"
   }
