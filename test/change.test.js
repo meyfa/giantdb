@@ -16,16 +16,14 @@ describe('lib/change.js', function () {
     return expect(obj.id).to.equal('foo')
   })
 
-  it("has property 'committed'", function () {
-    const out = new DevNull()
-    const obj = new Change('foo', out, () => {}, () => {})
-    return expect(obj.committed).to.be.false
-  })
-
-  it("has property 'destroyed'", function () {
-    const out = new DevNull()
-    const obj = new Change('foo', out, () => {}, () => {})
-    return expect(obj.destroyed).to.be.false
+  describe('#write()', function () {
+    it('destroys on write error', function (done) {
+      const out = new DevNull({
+        write: (ch, enc, cb) => cb(new Error('oops!'))
+      })
+      const obj = new Change('foo', out, () => {}, () => done())
+      obj.write('data')
+    })
   })
 
   describe('#end()', function () {
@@ -70,8 +68,7 @@ describe('lib/change.js', function () {
       const out = new DevNull()
       const obj = new Change('foo', out, () => {}, () => {})
       obj.commit()
-      return expect(obj.commit()).to.eventually.be
-        .rejectedWith('already committed')
+      return expect(obj.commit()).to.eventually.be.rejectedWith('invalid state')
     })
 
     it('rejects when already destroyed', function (done) {
@@ -80,8 +77,8 @@ describe('lib/change.js', function () {
       })
       const obj = new Change('foo', out, () => {}, () => {})
       obj.on('error', function () {
-        expect(obj.commit()).to.eventually.be
-          .rejectedWith('already destroyed').notify(done)
+        expect(obj.commit()).to.eventually.be.rejectedWith('invalid state')
+          .notify(done)
       })
       obj.end('some data to trigger write error')
     })
@@ -98,22 +95,6 @@ describe('lib/change.js', function () {
       out.end = () => out.emit('error', new Error('oops!'))
       const obj = new Change('foo', out, () => {}, () => done())
       obj.commit().catch(() => {})
-    })
-
-    it("sets 'destroyed' to true when the underlying stream fails", function () {
-      const out = new PassThrough()
-      out.end = () => out.emit('error', new Error('oops!'))
-      const obj = new Change('foo', out, () => {}, () => {})
-      return obj.commit().catch(() => {
-        return expect(obj.destroyed).to.be.true
-      })
-    })
-
-    it("sets 'committed' to true", function () {
-      const out = new DevNull()
-      const obj = new Change('foo', out, () => {}, () => {})
-      obj.commit()
-      expect(obj.committed).to.be.true
     })
 
     it('resolves even if end() has already been called', function (done) {
