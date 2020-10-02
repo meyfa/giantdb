@@ -6,9 +6,9 @@ const expect = chai.expect
 
 const PassThrough = require('stream').PassThrough
 
-const MiddlewareManager = require('../lib/middlewaremanager.js')
+const MiddlewareManager = require('../../lib/middleware/manager.js')
 
-describe('lib/middlewaremanager.js', function () {
+describe('lib/middleware/manager.js', function () {
   describe('#register()', function () {
     it('registers objects', function () {
       const obj = new MiddlewareManager()
