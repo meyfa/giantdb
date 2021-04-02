@@ -106,10 +106,11 @@ describe('lib/iomanager.js', function () {
       const adapter = new MemoryAdapter()
       const obj = new IOManager(adapter, mockMiddlewareManager())
       expect(obj.createWriteStream('foo')).to.eventually.be.fulfilled.then(result => {
-        result.stream.end('passTest', () => {
+        result.stream.on('finish', () => {
           expect(adapter.read('foo', 'utf8')).to.eventually.equal('passTest')
             .notify(done)
         })
+        result.stream.end('passTest')
       })
     })
 
@@ -164,10 +165,11 @@ describe('lib/iomanager.js', function () {
       const adapter = new MemoryAdapter()
       const obj = new IOManager(adapter, mockMiddlewareManager())
       expect(obj.createTemporary('foo', {})).to.eventually.be.fulfilled.then(stream => {
-        stream.end('passTest', () => {
+        stream.on('finish', () => {
           expect(adapter.read('foo.tmp', 'utf8')).to.eventually.equal('passTest')
             .notify(done)
         })
+        stream.end('passTest')
       })
     })
 
