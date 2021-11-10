@@ -1,14 +1,11 @@
-'use strict'
+import delay from 'delay'
+import { IdSet } from '../lib/idset'
 
-const chai = require('chai')
-chai.use(require('chai-as-promised'))
-const expect = chai.expect
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+chai.use(chaiAsPromised)
 
-const delay = require('delay')
-
-const IdSet = require('../lib/idset.js')
-
-describe('lib/idset.js', function () {
+describe('lib/idset.ts', function () {
   describe('#add()', function () {
     it('returns a promise', function () {
       const obj = new IdSet(() => ['AB', 'CD'])
@@ -29,9 +26,9 @@ describe('lib/idset.js', function () {
       return expect(obj.includes('AB')).to.eventually.be.true
     })
 
-    it('finds added ids', function () {
+    it('finds added ids', async function () {
       const obj = new IdSet(() => ['AB', 'CD'])
-      return obj.add('EF').then(function () {
+      return await obj.add('EF').then(function () {
         return expect(obj.includes('EF')).to.eventually.be.true
       })
     })
@@ -41,9 +38,9 @@ describe('lib/idset.js', function () {
       return expect(obj.includes('EF')).to.eventually.be.false
     })
 
-    it('gives false for removed ids', function () {
+    it('gives false for removed ids', async function () {
       const obj = new IdSet(() => ['AB', 'CD'])
-      return obj.remove('AB').then(function () {
+      return await obj.remove('AB').then(function () {
         return expect(obj.includes('AB')).to.eventually.be.false
       })
     })
@@ -52,8 +49,8 @@ describe('lib/idset.js', function () {
   describe('#each()', function () {
     it('iterates over all items', function (done) {
       const obj = new IdSet(() => ['AB', 'CD', 'EF'])
-      const parameters = []
-      obj.each((id) => {
+      const parameters: any[] = []
+      void obj.each((id) => {
         parameters.push(id)
         if (parameters.length >= 3) {
           expect(parameters).to.have.members(['AB', 'CD', 'EF'])
@@ -67,10 +64,10 @@ describe('lib/idset.js', function () {
       return expect(obj.each(() => {})).to.eventually.be.fulfilled
     })
 
-    it('fulfills the Promise after all iterations are done', function () {
+    it('fulfills the Promise after all iterations are done', async function () {
       const obj = new IdSet(() => ['AB', 'CD', 'EF'])
       let iterations = 0
-      return obj.each(() => ++iterations).then(() => {
+      return await obj.each(() => ++iterations).then(() => {
         return expect(iterations).to.equal(3)
       })
     })
@@ -79,7 +76,7 @@ describe('lib/idset.js', function () {
       const obj = new IdSet(() => ['AB', 'CD'])
       let first = true
       let finished = false
-      obj.each(async () => {
+      void obj.each(async () => {
         if (first) {
           first = false
           await delay(20)
@@ -91,11 +88,11 @@ describe('lib/idset.js', function () {
       })
     })
 
-    it('allows for element removal', function () {
+    it('allows for element removal', async function () {
       const obj = new IdSet(() => ['AB', 'CD', 'EF'])
-      let removed = null
-      obj.each((id) => {
-        if (!removed) {
+      let removed: string | undefined
+      await obj.each((id) => {
+        if (removed == null) {
           // pick any item other than the current
           removed = id === 'AB' ? 'CD' : 'AB'
           return obj.remove(removed)

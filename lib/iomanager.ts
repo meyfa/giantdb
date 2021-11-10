@@ -1,13 +1,22 @@
-'use strict'
+import { Adapter } from 'fs-adapters'
+import { MiddlewareManager } from './middleware/manager'
+import { TransformResult } from './middleware/transformable'
+import { Readable, Writable } from 'stream'
 
-class IOManager {
+/**
+ * Helper class for I/O operations.
+ */
+export class IOManager {
+  private readonly _adapter: Adapter
+  private readonly _middlewareManager: MiddlewareManager
+
   /**
    * Construct a new IOManager.
    *
-   * @param {object} adapter The IO adapter.
-   * @param {object} middlewareManager The middleware manager.
+   * @param adapter The IO adapter.
+   * @param middlewareManager The middleware manager.
    */
-  constructor (adapter, middlewareManager) {
+  constructor (adapter: Adapter, middlewareManager: MiddlewareManager) {
     this._adapter = adapter
     this._middlewareManager = middlewareManager
   }
@@ -18,12 +27,12 @@ class IOManager {
    * 'stream' (the readable stream), 'metadata' (the new metadata), and
    * 'metadataChanged' (a boolean indicating whether the metadata was modified).
    *
-   * @param {string} id The item id.
-   * @param {object} meta The item metadata.
-   * @param {object} options Middleware options.
-   * @returns {Promise<object>} A Promise resolving to a result object.
+   * @param id The item id.
+   * @param meta The item metadata.
+   * @param options Middleware options.
+   * @returns A Promise resolving to a result object.
    */
-  async createReadStream (id, meta, options) {
+  async createReadStream (id: string, meta: object, options?: object): Promise<TransformResult<Readable>> {
     const stream = this._adapter.createReadStream(id)
     const result = await this._middlewareManager.transformReadable(stream, meta, options)
     if (result.metadataChanged) {
@@ -38,12 +47,12 @@ class IOManager {
    * 'stream' (the writable stream), 'metadata' (the new metadata), and
    * 'metadataChanged' (a boolean indicating whether the metadata was modified).
    *
-   * @param {string} id The item id.
-   * @param {object} meta The item metadata.
-   * @param {object} options Middleware options.
-   * @returns {Promise<object>} A Promise resolving to a result object.
+   * @param id The item id.
+   * @param meta The item metadata.
+   * @param options Middleware options.
+   * @returns A Promise resolving to a result object.
    */
-  async createWriteStream (id, meta, options) {
+  async createWriteStream (id: string, meta: object, options?: object): Promise<TransformResult<Writable>> {
     const stream = this._adapter.createWriteStream(id)
     const result = await this._middlewareManager.transformWritable(stream, meta, options)
     if (result.metadataChanged) {
@@ -55,11 +64,11 @@ class IOManager {
   /**
    * Create a temporary write stream to an item that can be published later.
    *
-   * @param {string} id The item id.
-   * @param {object} options Middleware options.
-   * @returns {Promise<object>} A Promise that resolves to a Writable Stream.
+   * @param id The item id.
+   * @param options Middleware options.
+   * @returns A Promise that resolves to a Writable Stream.
    */
-  async createTemporary (id, options) {
+  async createTemporary (id: string, options?: object): Promise<Writable> {
     const stream = this._adapter.createWriteStream(id + '.tmp')
     const result = await this._middlewareManager.transformWritable(stream, {}, options)
     await this.writeMetadata(id, result.metadata)
@@ -70,20 +79,20 @@ class IOManager {
    * Mark the item with the given id as non-temporary as part of the commit
    * process.
    *
-   * @param {string} id The item id.
-   * @returns {Promise} A Promise that resolves when done.
+   * @param id The item id.
+   * @returns A Promise that resolves when done.
    */
-  async publish (id) {
+  async publish (id: string): Promise<void> {
     await this._adapter.rename(id + '.tmp', id)
   }
 
   /**
    * Delete all data for the item with the given id.
    *
-   * @param {string} id The item id.
-   * @returns {Promise} A Promise that resolves when done.
+   * @param id The item id.
+   * @returns A Promise that resolves when done.
    */
-  async delete (id) {
+  async delete (id: string): Promise<void> {
     await Promise.all([
       this._adapter.delete(id),
       this._adapter.delete(id + '.json')
@@ -93,10 +102,10 @@ class IOManager {
   /**
    * Delete the temporary item with the given id.
    *
-   * @param {string} id The item id.
-   * @returns {Promise} A Promise that resolves when done.
+   * @param id The item id.
+   * @returns A Promise that resolves when done.
    */
-  async deleteTemporary (id) {
+  async deleteTemporary (id: string): Promise<void> {
     await Promise.all([
       this._adapter.delete(id + '.tmp'),
       this._adapter.delete(id + '.json').catch((err) => {
@@ -111,25 +120,23 @@ class IOManager {
   /**
    * Read the metadata object for the item with the given id.
    *
-   * @param {string} id The item's id.
-   * @returns {Promise<object>} A Promise that resolves to the metadata.
+   * @param id The item's id.
+   * @returns A Promise that resolves to the metadata.
    */
-  async readMetadata (id) {
-    const json = await this._adapter.read(id + '.json', 'utf8')
+  async readMetadata (id: string): Promise<object> {
+    const json = await this._adapter.read(id + '.json', 'utf8') as string
     return JSON.parse(json)
   }
 
   /**
    * Write a metadata object for the item with the given id.
    *
-   * @param {string} id The item's id.
-   * @param {object} metadata The metadata to write.
-   * @returns {Promise} A Promise that resolves when done.
+   * @param id The item's id.
+   * @param metadata The metadata to write.
+   * @returns A Promise that resolves when done.
    */
-  async writeMetadata (id, metadata) {
+  async writeMetadata (id: string, metadata: object): Promise<void> {
     const json = JSON.stringify(metadata)
     await this._adapter.write(id + '.json', json)
   }
 }
-
-module.exports = IOManager

@@ -1,21 +1,30 @@
-'use strict'
+import { IOManager } from './iomanager'
+import { TransformResult } from './middleware/transformable'
+import { Readable, Stream, Writable } from 'stream'
 
-class Item {
+/**
+ * A single database item.
+ */
+export class Item {
+  readonly id: string
+  metadata: object
+  private readonly _ioManager: IOManager
+
   /**
    * Construct a new Item.
    *
-   * @param {string} id The item id.
-   * @param {object} ioManager The IO manager.
-   * @param {object} metadata An object containing item metadata.
+   * @param id The item id.
+   * @param ioManager The IO manager.
+   * @param metadata An object containing item metadata.
    */
-  constructor (id, ioManager, metadata) {
+  constructor (id: string, ioManager: IOManager, metadata: object) {
     this.id = id
     this.metadata = metadata
 
     this._ioManager = ioManager
   }
 
-  _processStreamResult (result) {
+  private _processStreamResult<S extends Stream> (result: TransformResult<S>): S {
     if (result.metadataChanged) {
       this.metadata = result.metadata
     }
@@ -25,10 +34,10 @@ class Item {
   /**
    * Obtain a read stream for this item.
    *
-   * @param {object} options Middleware options.
-   * @returns {Promise<object>} A Promise that resolves to a Readable Stream.
+   * @param options Middleware options.
+   * @returns A Promise that resolves to a Readable Stream.
    */
-  async getReadable (options) {
+  async getReadable (options?: object): Promise<Readable> {
     const result = await this._ioManager.createReadStream(this.id, this.metadata, options)
     return this._processStreamResult(result)
   }
@@ -36,10 +45,10 @@ class Item {
   /**
    * Obtain a write stream for this item.
    *
-   * @param {object} options Middleware options.
-   * @returns {Promise<object>} A Promise that resolves to a Writable Stream.
+   * @param options Middleware options.
+   * @returns A Promise that resolves to a Writable Stream.
    */
-  async getWritable (options) {
+  async getWritable (options?: object): Promise<Writable> {
     const result = await this._ioManager.createWriteStream(this.id, this.metadata, options)
     return this._processStreamResult(result)
   }
@@ -51,11 +60,9 @@ class Item {
    * made. Note that the metadata may also be saved on other occurrences (e.g.
    * when modified by middleware), but that is not guaranteed.
    *
-   * @returns {Promise} A Promise that resolves when done.
+   * @returns A Promise that resolves when done.
    */
-  async saveMetadata () {
+  async saveMetadata (): Promise<void> {
     await this._ioManager.writeMetadata(this.id, this.metadata)
   }
 }
-
-module.exports = Item
