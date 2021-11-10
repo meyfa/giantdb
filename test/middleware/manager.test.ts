@@ -1,14 +1,11 @@
-'use strict'
+import { PassThrough } from 'stream'
+import { MiddlewareManager } from '../../lib/middleware/manager'
 
-const chai = require('chai')
-chai.use(require('chai-as-promised'))
-const expect = chai.expect
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+chai.use(chaiAsPromised)
 
-const PassThrough = require('stream').PassThrough
-
-const MiddlewareManager = require('../../lib/middleware/manager.js')
-
-describe('lib/middleware/manager.js', function () {
+describe('lib/middleware/manager.ts', function () {
   describe('#register()', function () {
     it('registers objects', function () {
       const obj = new MiddlewareManager()
@@ -25,7 +22,7 @@ describe('lib/middleware/manager.js', function () {
           done()
         }
       })
-      obj.transformReadable(new PassThrough(), {}, {})
+      void obj.transformReadable(new PassThrough(), {}, {})
     })
 
     it('passes the arguments to the middleware', function (done) {
@@ -43,13 +40,13 @@ describe('lib/middleware/manager.js', function () {
           done()
         }
       })
-      obj.transformReadable(stream, meta, options)
+      void obj.transformReadable(stream, meta, options)
     })
 
     it('ignores middleware missing the method', function () {
       const obj = new MiddlewareManager()
       obj.register({})
-      obj.register({ transformReadable: null })
+      obj.register({ transformReadable: null as any })
       return expect(obj.transformReadable(new PassThrough(), {}, {}))
         .to.eventually.be.fulfilled
     })
@@ -147,7 +144,7 @@ describe('lib/middleware/manager.js', function () {
           done()
         }
       })
-      obj.transformWritable(new PassThrough(), {}, {})
+      void obj.transformWritable(new PassThrough(), {}, {})
     })
 
     it('passes the arguments to the middleware', function (done) {
@@ -165,13 +162,13 @@ describe('lib/middleware/manager.js', function () {
           done()
         }
       })
-      obj.transformWritable(stream, meta, options)
+      void obj.transformWritable(stream, meta, options)
     })
 
     it('ignores middleware missing the method', function () {
       const obj = new MiddlewareManager()
       obj.register({})
-      obj.register({ transformWritable: null })
+      obj.register({ transformWritable: null as any })
       return expect(obj.transformWritable(new PassThrough(), {}, {}))
         .to.eventually.be.fulfilled
     })

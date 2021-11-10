@@ -1,46 +1,44 @@
-'use strict'
+import { MemoryAdapter } from 'fs-adapters'
+import { PassThrough } from 'stream'
+import { MiddlewareManager } from '../lib/middleware/manager'
+import { IOManager } from '../lib/iomanager'
 
-const chai = require('chai')
-chai.use(require('chai-as-promised'))
-const expect = chai.expect
-
-const { MemoryAdapter } = require('fs-adapters')
-const PassThrough = require('stream').PassThrough
-
-const IOManager = require('../lib/iomanager.js')
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+chai.use(chaiAsPromised)
 
 /**
- * @returns {object} Mock middleware manager.
+ * @returns Mock middleware manager.
  */
-function mockMiddlewareManager () {
-  return {
-    transformReadable (stream, meta/*, options */) {
-      return {
-        stream: stream,
-        metadata: meta,
-        metadataChanged: false
-      }
-    },
-    transformWritable (stream, meta/*, options */) {
-      return {
-        stream: stream,
-        metadata: meta,
-        metadataChanged: false
-      }
+function mockMiddlewareManager (): MiddlewareManager {
+  const manager = new MiddlewareManager()
+  manager.transformReadable = async (stream, meta/*, options */) => {
+    return {
+      stream: stream,
+      metadata: meta,
+      metadataChanged: false
     }
   }
+  manager.transformWritable = async (stream, meta/*, options */) => {
+    return {
+      stream: stream,
+      metadata: meta,
+      metadataChanged: false
+    }
+  }
+  return manager
 }
 
-describe('lib/iomanager.js', function () {
+describe('lib/iomanager.ts', function () {
   describe('#createReadStream()', function () {
     it('gets a stream from the adapter', function (done) {
       const adapter = new MemoryAdapter({
         foo: Buffer.from('test')
       })
       const obj = new IOManager(adapter, mockMiddlewareManager())
-      expect(obj.createReadStream('foo')).to.eventually.have.property('stream').then(stream => {
-        stream.on('data', chunk => {
-          expect(chunk.toString()).to.equal('test')
+      void expect(obj.createReadStream('foo', {}, {})).to.eventually.have.property('stream').then(stream => {
+        stream.on('data', (chunk: Buffer) => {
+          void expect(chunk.toString()).to.equal('test')
           done()
         })
       })
@@ -61,11 +59,11 @@ describe('lib/iomanager.js', function () {
       })
 
       const middlewareManager = mockMiddlewareManager()
-      middlewareManager.transformReadable = function (stream, meta, opts) {
-        return Promise.all([
-          new Promise(resolve => {
+      middlewareManager.transformReadable = async function (stream, meta, opts) {
+        return await Promise.all([
+          new Promise<void>(resolve => {
             stream.on('data', chunk => {
-              expect(chunk).to.satisfy(c => Buffer.from('test').equals(c))
+              expect(chunk).to.satisfy((c: Buffer) => Buffer.from('test').equals(c))
               resolve()
             })
           }),
@@ -79,22 +77,22 @@ describe('lib/iomanager.js', function () {
         .to.eventually.deep.equal(middlewareResult)
     })
 
-    it('writes metadata if changed by middleware', function () {
+    it('writes metadata if changed by middleware', async function () {
       const adapter = new MemoryAdapter({
         foo: Buffer.alloc(0)
       })
 
       const middlewareManager = mockMiddlewareManager()
-      middlewareManager.transformReadable = function () {
-        return Promise.resolve({
+      middlewareManager.transformReadable = async function () {
+        return {
           stream: new PassThrough(),
           metadata: { passTest: true },
           metadataChanged: true
-        })
+        }
       }
 
       const obj = new IOManager(adapter, middlewareManager)
-      return obj.createReadStream('foo', {}, {}).then(() => {
+      return await obj.createReadStream('foo', {}, {}).then(() => {
         return expect(adapter.read('foo.json', 'utf8'))
           .to.eventually.equal('{"passTest":true}')
       })
@@ -105,9 +103,9 @@ describe('lib/iomanager.js', function () {
     it('gets a stream from the adapter', function (done) {
       const adapter = new MemoryAdapter()
       const obj = new IOManager(adapter, mockMiddlewareManager())
-      expect(obj.createWriteStream('foo')).to.eventually.be.fulfilled.then(result => {
+      void expect(obj.createWriteStream('foo', {}, {})).to.eventually.be.fulfilled.then(result => {
         result.stream.on('finish', () => {
-          expect(adapter.read('foo', 'utf8')).to.eventually.equal('passTest')
+          void expect(adapter.read('foo', 'utf8')).to.eventually.equal('passTest')
             .notify(done)
         })
         result.stream.end('passTest')
@@ -127,8 +125,8 @@ describe('lib/iomanager.js', function () {
       const adapter = new MemoryAdapter()
 
       const middlewareManager = mockMiddlewareManager()
-      middlewareManager.transformWritable = function (stream, meta, opts) {
-        return Promise.all([
+      middlewareManager.transformWritable = async function (stream, meta, opts) {
+        return await Promise.all([
           expect(stream).to.be.an('object'),
           expect(meta).to.equal(meta1),
           expect(opts).to.equal(options)
@@ -140,20 +138,20 @@ describe('lib/iomanager.js', function () {
         .to.eventually.deep.equal(middlewareResult)
     })
 
-    it('writes metadata if changed by middleware', function () {
+    it('writes metadata if changed by middleware', async function () {
       const adapter = new MemoryAdapter()
 
       const middlewareManager = mockMiddlewareManager()
-      middlewareManager.transformWritable = function () {
-        return Promise.resolve({
+      middlewareManager.transformWritable = async function () {
+        return {
           stream: new PassThrough(),
           metadata: { passTest: true },
           metadataChanged: true
-        })
+        }
       }
 
       const obj = new IOManager(adapter, middlewareManager)
-      return obj.createWriteStream('foo', {}, {}).then(() => {
+      return await obj.createWriteStream('foo', {}, {}).then(() => {
         return expect(adapter.read('foo.json', 'utf8'))
           .to.eventually.equal('{"passTest":true}')
       })
@@ -164,9 +162,9 @@ describe('lib/iomanager.js', function () {
     it('gets a stream from the adapter', function (done) {
       const adapter = new MemoryAdapter()
       const obj = new IOManager(adapter, mockMiddlewareManager())
-      expect(obj.createTemporary('foo', {})).to.eventually.be.fulfilled.then(stream => {
+      void expect(obj.createTemporary('foo', {})).to.eventually.be.fulfilled.then(stream => {
         stream.on('finish', () => {
-          expect(adapter.read('foo.tmp', 'utf8')).to.eventually.equal('passTest')
+          void expect(adapter.read('foo.tmp', 'utf8')).to.eventually.equal('passTest')
             .notify(done)
         })
         stream.end('passTest')
@@ -181,16 +179,16 @@ describe('lib/iomanager.js', function () {
       const adapter = new MemoryAdapter()
 
       const middlewareManager = mockMiddlewareManager()
-      middlewareManager.transformWritable = function (stream, meta, opts) {
+      middlewareManager.transformWritable = async function (stream, meta, opts) {
         expect(stream).to.be.an('object')
         expect(meta).to.deep.equal({})
         expect(opts).to.equal(options)
 
-        return Promise.resolve({
+        return {
           stream: stream2,
           metadata: metadata,
           metadataChanged: true
-        })
+        }
       }
 
       const obj = new IOManager(adapter, middlewareManager)
@@ -201,7 +199,7 @@ describe('lib/iomanager.js', function () {
     it('writes metadata', function () {
       const adapter = new MemoryAdapter()
       const obj = new IOManager(adapter, mockMiddlewareManager())
-      return expect(obj.createTemporary('foo')).to.eventually.be.fulfilled.then(() => {
+      return expect(obj.createTemporary('foo', {})).to.eventually.be.fulfilled.then(() => {
         return expect(adapter.read('foo.json', 'utf8'))
           .to.eventually.equal('{}')
       })
@@ -275,9 +273,7 @@ describe('lib/iomanager.js', function () {
       const _oldDelete = adapter.delete.bind(adapter)
       adapter.delete = async function (id) {
         if (id === 'foo.json') {
-          const err = new Error('no permission')
-          err.code = 'EPERM'
-          throw err
+          throw Object.assign(new Error('no permission'), { code: 'EPERM' })
         }
         return _oldDelete(id)
       }

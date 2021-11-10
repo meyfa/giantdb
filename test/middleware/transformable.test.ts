@@ -1,14 +1,13 @@
-'use strict'
+import { PassThrough } from 'stream'
+import { MiddlewareTransformable } from '../../lib/middleware/transformable'
 
-const chai = require('chai')
-chai.use(require('chai-as-promised'))
-const expect = chai.expect
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+chai.use(chaiAsPromised)
 
-const MiddlewareTransformable = require('../../lib/middleware/transformable.js')
-
-describe('lib/middleware/transformable.js', function () {
+describe('lib/middleware/transformable.ts', function () {
   it('stores stream and metadata', function () {
-    const stream = { a: 1 }
+    const stream = new PassThrough()
     const metadata = { a: 2 }
     const obj = new MiddlewareTransformable(stream, metadata)
     expect(obj.stream).to.equal(stream)
@@ -16,24 +15,24 @@ describe('lib/middleware/transformable.js', function () {
   })
 
   it('has "metadataChanged" set to false', function () {
-    const obj = new MiddlewareTransformable({}, {})
+    const obj = new MiddlewareTransformable(new PassThrough(), {})
     expect(obj.metadataChanged).to.be.false
   })
 
   describe('#update()', function () {
     it('does nothing for undefined/null input', function () {
-      const stream = { a: 1 }
+      const stream = new PassThrough()
       const metadata = { a: 2 }
       const obj = new MiddlewareTransformable(stream, metadata)
       obj.update(undefined)
-      obj.update(null)
+      obj.update(null as any)
       expect(obj.stream).to.equal(stream)
       expect(obj.metadata).to.equal(metadata)
       expect(obj.metadataChanged).to.be.false
     })
 
     it('does nothing for empty object input', function () {
-      const stream = { a: 1 }
+      const stream = new PassThrough()
       const metadata = { a: 2 }
       const obj = new MiddlewareTransformable(stream, metadata)
       obj.update({})
@@ -43,8 +42,8 @@ describe('lib/middleware/transformable.js', function () {
     })
 
     it('updates stream if present', function () {
-      const stream1 = { a: 0 }
-      const stream2 = { a: 1 }
+      const stream1 = new PassThrough()
+      const stream2 = new PassThrough()
       const metadata = { a: 2 }
       const obj = new MiddlewareTransformable(stream1, metadata)
       obj.update({ stream: stream2 })
@@ -54,7 +53,7 @@ describe('lib/middleware/transformable.js', function () {
     })
 
     it('updates metadata and sets metadataChanged if present', function () {
-      const stream = { a: 1 }
+      const stream = new PassThrough()
       const metadata1 = { a: 2 }
       const metadata2 = { a: 2 }
       const obj = new MiddlewareTransformable(stream, metadata1)

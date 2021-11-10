@@ -4,7 +4,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/39ebc35a4b32350a0191/test_coverage)](https://codeclimate.com/github/meyfa/giantdb/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/39ebc35a4b32350a0191/maintainability)](https://codeclimate.com/github/meyfa/giantdb/maintainability)
 
-GiantDB is a large object store, written entirely in JavaScript. It provides
+GiantDB is a large object store, written entirely in TypeScript. It provides
 managed data storage with a minimal, yet powerful programming interface.
 Promises and streams are used for making this efficient.
 
@@ -20,8 +20,8 @@ npm i giantdb
 
 ## Setup
 
-```javascript
-const GiantDB = require('giantdb')
+```ts
+import { GiantDB } from 'giantdb'
 
 const db = new GiantDB(/* source */)
 ```
@@ -42,7 +42,7 @@ special writable stream to which you can write data. Once done, you call
 
 Example:
 
-```javascript
+```ts
 db.create().then((change) => {
   change.write('hello world', 'utf8')
   // you can also .pipe(change), for example
@@ -61,7 +61,7 @@ the `Item` instance.
 
 Example:
 
-```javascript
+```ts
 db.get('d54232abbf9e9dc4e6a8fd72a6e25585').then((item) => {
   console.log(item.id) // 'd54232abbf9e9dc4e6a8fd72a6e25585'
 })
@@ -74,7 +74,7 @@ done. Any data associated with the item will be gone.
 
 Example:
 
-```javascript
+```ts
 db.remove('d54232abbf9e9dc4e6a8fd72a6e25585').then(() => {
   console.log('done')
 })
@@ -88,7 +88,7 @@ item.
 
 Example:
 
-```javascript
+```ts
 db.each((item) => console.log(item.id))
 ```
 
@@ -108,7 +108,7 @@ This obtains a read stream for reading the item's data. It returns a Promise.
 
 Example:
 
-```javascript
+```ts
 db.get('d54232abbf9e9dc4e6a8fd72a6e25585').then((item) => {
   return item.getReadable().then((readable) => {
     // read data from the stream
@@ -123,7 +123,7 @@ contents. It returns a Promise.
 
 Example:
 
-```javascript
+```ts
 db.get('d54232abbf9e9dc4e6a8fd72a6e25585').then((item) => {
   return item.getWritable().then((writable) => {
     // write data to the stream
@@ -141,7 +141,7 @@ modified by middleware), but that is not guaranteed.
 
 Example:
 
-```javascript
+```ts
 db.get('d54232abbf9e9dc4e6a8fd72a6e25585').then((item) => {
   item.metadata.lastRead = Date.now()
   return item.saveMetadata().then(() => {
@@ -165,27 +165,27 @@ functionality. The encryption middleware is the best example for this.
 
 #### transformReadable
 
-```javascript
-function transformReadable(stream, metadata, options, next)
+```ts
+function transformReadable (stream, metadata, options, next)
 ```
 
 This function is called every time a *readable* stream to one of the items is
 constructed. It enables the middleware to tap into the read stream or modify it.
 An example for this would be piping the input through a decryption stream.
 
-- `stream` (`stream.Readable`): The input read stream.
-- `metadata` (`Object`): The item's current metadata.
-- `options` (`Object`): An object provided by the user.
-- `next` (`function (error, result)`): A callback.
+- `stream: stream.Readable`: The input read stream.
+- `metadata: object`: The item's current metadata.
+- `options?: object`: An object provided by the user.
+- `next: (error?: Error, result?: object) => void`): A callback.
 
 Calling `next()` is mandatory, otherwise middleware processing cannot continue.
-If you need to, pass an `Error` as the first argument to the callback.
+If you need to, pass an error as the first argument to the callback.
 
 When either `stream` or `metadata` changed as part of your middleware function,
 you must pass a result object containing the changed properties to the callback,
 like this:
 
-```javascript
+```ts
 next(null, {
   stream: myNewReadStream, // if stream changed
   metadata: myNewMetadata // if metadata changed
@@ -194,18 +194,18 @@ next(null, {
 
 #### transformWritable
 
-```javascript
-function transformWritable(stream, metadata, options, next)
+```ts
+function transformWritable (stream, metadata, options, next)
 ```
 
 This function is called every time a *writable* stream to one of the items is
 constructed. It enables the middleware to modify the stream.
 An example for this would be adding an encryption layer.
 
-- `stream` (`stream.Writable`): The input write stream.
-- `metadata` (`Object`): The item's current metadata.
-- `options` (`Object`): An object provided by the user.
-- `next` (`function (error, result)`): A callback.
+- `stream: stream.Writable`: The input write stream.
+- `metadata: object`: The item's current metadata.
+- `options?: object`: An object provided by the user.
+- `next: (error?: Error, result?: object) => void`): A callback.
 
 Calling `next()` is mandatory, otherwise middleware processing cannot continue.
 If you need to, pass an `Error` as the first argument to the callback.
@@ -214,7 +214,7 @@ When either `stream` or `metadata` changed as part of your middleware function,
 you must pass a result object containing the changed properties to the callback,
 like this:
 
-```javascript
+```ts
 next(null, {
   stream: myNewWriteStream, // if stream changed
   metadata: myNewMetadata // if metadata changed
