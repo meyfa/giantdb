@@ -1,9 +1,9 @@
 extends:
   - standard
-  - "plugin:jsdoc/recommended"
+  - 'plugin:jsdoc/recommended'
 
 overrides:
-  - files: "*.test.js"
+  - files: '**/*.test.js'
     env:
       mocha: true
     rules:
