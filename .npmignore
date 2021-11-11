@@ -1,9 +1,0 @@
-.gitattributes
-.gitignore
-
-/.nyc_output
-/coverage
-
-.eslintrc.yml
-
-/test

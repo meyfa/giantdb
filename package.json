@@ -4,6 +4,9 @@
   "description": "Large object database in native JavaScript, with encryption support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
