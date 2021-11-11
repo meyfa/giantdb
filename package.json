@@ -1,6 +1,6 @@
 {
   "name": "giantdb",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Large object database in native JavaScript, with encryption support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
