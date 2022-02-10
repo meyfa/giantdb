@@ -92,14 +92,20 @@ describe('lib/change.ts', function () {
 
     it('rejects when the underlying stream fails', function () {
       const out = new PassThrough()
-      out.end = () => out.emit('error', new Error('oops!'))
+      out.end = () => {
+        out.emit('error', new Error('oops!'))
+        return out
+      }
       const obj = new Change('foo', out, mockCommitter(), () => {})
       return expect(obj.commit()).to.eventually.be.rejectedWith('oops!')
     })
 
     it('invokes the destroyer when the underlying stream fails', function (done) {
       const out = new PassThrough()
-      out.end = () => out.emit('error', new Error('oops!'))
+      out.end = () => {
+        out.emit('error', new Error('oops!'))
+        return out
+      }
       const obj = new Change('foo', out, mockCommitter(), () => done())
       obj.commit().catch(() => {})
     })
