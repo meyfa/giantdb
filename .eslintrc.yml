@@ -1,6 +1,6 @@
 extends:
-- 'standard-with-typescript'
-- 'plugin:jsdoc/recommended'
+  - 'standard-with-typescript'
+  - 'plugin:jsdoc/recommended'
 
 parserOptions:
   project: './tsconfig.eslint.json'

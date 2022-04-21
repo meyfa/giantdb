@@ -3,24 +3,21 @@ name: CI
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
 
 jobs:
   lint:
     name: Linting
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version:
-        - 16
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run lint
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
 
   test:
     name: test - Node.js ${{ matrix.node-version }}
@@ -28,29 +25,31 @@ jobs:
     strategy:
       matrix:
         node-version:
-        - 16
-        - 14
-        - 12
+          - 18
+          - 16
+          - 14
+          - 12
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm test
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
 
   coverage:
-    needs: [ test ]
     name: Coverage
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        node-version: 16
-    - run: npm ci
-    - uses: paambaati/codeclimate-action@v3.0.0
-      env:
-        CC_TEST_REPORTER_ID: b3df94447af4bcd989d98071c01663c7efadc478d9675adcbb29834f5f4240a4
-      with:
-        coverageCommand: npm run coverage
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci
+      - uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: b3df94447af4bcd989d98071c01663c7efadc478d9675adcbb29834f5f4240a4
+        with:
+          coverageCommand: npm run coverage
