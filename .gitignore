@@ -1,5 +1,7 @@
+.DS_Store
 node_modules/
 .idea
 /dist
-.nyc_output/
-coverage/
+.nyc_output
+/coverage
+/tmp
