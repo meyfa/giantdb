@@ -8,10 +8,8 @@
     "declaration": true,
     "outDir": "./dist"
   },
-  "exclude": [
-    "test",
-    "dist",
-    "node_modules"
+  "include": [
+    "src"
   ],
   "ts-node": {
     "experimentalResolver": true

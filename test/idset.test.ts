@@ -1,5 +1,5 @@
 import delay from 'delay'
-import { IdSet } from '../lib/idset.js'
+import { IdSet } from '../src/idset.js'
 
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
