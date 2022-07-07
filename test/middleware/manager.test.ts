@@ -59,7 +59,7 @@ describe('lib/middleware/manager.ts', function () {
       const obj = new MiddlewareManager()
       return expect(obj.transformReadable(stream, meta, options))
         .to.eventually.be.an('object').that.deep.equals({
-          stream: stream,
+          stream,
           metadata: meta,
           metadataChanged: false
         })
@@ -181,7 +181,7 @@ describe('lib/middleware/manager.ts', function () {
       const obj = new MiddlewareManager()
       return expect(obj.transformWritable(stream, meta, options))
         .to.eventually.be.an('object').that.deep.equals({
-          stream: stream,
+          stream,
           metadata: meta,
           metadataChanged: false
         })
