@@ -14,14 +14,14 @@ function mockMiddlewareManager (): MiddlewareManager {
   const manager = new MiddlewareManager()
   manager.transformReadable = async (stream, meta/*, options */) => {
     return {
-      stream: stream,
+      stream,
       metadata: meta,
       metadataChanged: false
     }
   }
   manager.transformWritable = async (stream, meta/*, options */) => {
     return {
-      stream: stream,
+      stream,
       metadata: meta,
       metadataChanged: false
     }
@@ -186,7 +186,7 @@ describe('lib/iomanager.ts', function () {
 
         return {
           stream: stream2,
-          metadata: metadata,
+          metadata,
           metadataChanged: true
         }
       }
