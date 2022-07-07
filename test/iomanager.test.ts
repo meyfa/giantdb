@@ -1,7 +1,7 @@
 import { MemoryAdapter } from 'fs-adapters'
 import { PassThrough } from 'stream'
-import { MiddlewareManager } from '../lib/middleware/manager.js'
-import { IOManager } from '../lib/iomanager.js'
+import { MiddlewareManager } from '../src/middleware/manager.js'
+import { IOManager } from '../src/iomanager.js'
 
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'

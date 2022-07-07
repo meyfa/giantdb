@@ -1,6 +1,6 @@
 import { PassThrough, Writable } from 'stream'
-import { Change } from '../lib/change.js'
-import { Item } from '../lib/item.js'
+import { Change } from '../src/change.js'
+import { Item } from '../src/item.js'
 
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
