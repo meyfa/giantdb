@@ -1,6 +1,6 @@
 import { Readable, Stream, Writable } from 'stream'
-import { MiddlewareTransformable, TransformResult } from './transformable'
-import { Middleware, MiddlewareResult, MiddlewareTransformFn } from './middleware'
+import { MiddlewareTransformable, TransformResult } from './transformable.js'
+import { Middleware, MiddlewareResult, MiddlewareTransformFn } from './middleware.js'
 
 type TransformAccessor<S extends Stream> = (mw: Middleware) => undefined | MiddlewareTransformFn<S>
 

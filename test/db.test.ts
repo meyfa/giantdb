@@ -1,8 +1,8 @@
 import delay from 'delay'
 import { MemoryAdapter } from 'fs-adapters'
-import { Change } from '../lib/change'
-import { Item } from '../lib/item'
-import { GiantDB } from '../lib/giantdb'
+import { Change } from '../lib/change.js'
+import { Item } from '../lib/item.js'
+import { GiantDB } from '../lib/giantdb.js'
 
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
