@@ -1,5 +1,5 @@
 import { PassThrough } from 'stream'
-import { MiddlewareTransformable } from '../../lib/middleware/transformable'
+import { MiddlewareTransformable } from '../../lib/middleware/transformable.js'
 
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'

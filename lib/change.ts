@@ -1,6 +1,6 @@
 import WritableWrapper from 'writable-wrapper'
 import { Writable } from 'stream'
-import { Item } from './item'
+import { Item } from './item.js'
 
 /**
  * An object representing a change on an item, still to be committed.

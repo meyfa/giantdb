@@ -1,5 +1,5 @@
 import { PassThrough } from 'stream'
-import { MiddlewareManager } from '../../lib/middleware/manager'
+import { MiddlewareManager } from '../../lib/middleware/manager.js'
 
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'

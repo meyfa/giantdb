@@ -1,5 +1,5 @@
 import { Stream } from 'stream'
-import { MiddlewareResult } from './middleware'
+import { MiddlewareResult } from './middleware.js'
 
 /**
  * Represents a triple (stream, metadata, metadataChanged) containing the results of middleware evaluation.

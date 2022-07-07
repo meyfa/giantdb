@@ -1,5 +1,5 @@
-import { IOManager } from './iomanager'
-import { TransformResult } from './middleware/transformable'
+import { IOManager } from './iomanager.js'
+import { TransformResult } from './middleware/transformable.js'
 import { Readable, Stream, Writable } from 'stream'
 
 /**

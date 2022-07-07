@@ -1,12 +1,12 @@
 import crypto from 'crypto'
 import util from 'util'
 import { Adapter, DirectoryAdapter, MemoryAdapter } from 'fs-adapters'
-import { IdSet } from './idset'
-import { IOManager } from './iomanager'
-import { Middleware } from './middleware/middleware'
-import { MiddlewareManager } from './middleware/manager'
-import { Change } from './change'
-import { Item } from './item'
+import { IdSet } from './idset.js'
+import { IOManager } from './iomanager.js'
+import { Middleware } from './middleware/middleware.js'
+import { MiddlewareManager } from './middleware/manager.js'
+import { Change } from './change.js'
+import { Item } from './item.js'
 
 const cryptoRandomBytes = util.promisify(crypto.randomBytes)
 

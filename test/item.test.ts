@@ -1,8 +1,8 @@
 import { PassThrough, Readable, Writable } from 'stream'
-import { IOManager } from '../lib/iomanager'
+import { IOManager } from '../lib/iomanager.js'
 import { MemoryAdapter } from 'fs-adapters'
-import { MiddlewareManager } from '../lib/middleware/manager'
-import { Item } from '../lib/item'
+import { MiddlewareManager } from '../lib/middleware/manager.js'
+import { Item } from '../lib/item.js'
 
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
