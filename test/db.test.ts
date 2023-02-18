@@ -1,12 +1,9 @@
+import assert from 'assert'
 import delay from 'delay'
 import { MemoryAdapter } from 'fs-adapters'
 import { Change } from '../src/change.js'
 import { Item } from '../src/item.js'
 import { GiantDB } from '../src/giantdb.js'
-
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-chai.use(chaiAsPromised)
 
 describe('lib/db.ts', function () {
   describe('#use()', function () {
@@ -17,66 +14,58 @@ describe('lib/db.ts', function () {
   })
 
   describe('#create()', function () {
-    it('returns a promise', function () {
+    it('returns a promise', async function () {
       const obj = new GiantDB()
-      return expect(obj.create()).to.eventually.be.fulfilled
+      await assert.doesNotReject(obj.create())
     })
 
-    it('resolves to a Change', function () {
+    it('resolves to a Change', async function () {
       const obj = new GiantDB()
-      return expect(obj.create()).to.eventually.be.instanceOf(Change)
+      assert.ok(await obj.create() instanceof Change)
     })
 
-    it('sets an id', function () {
+    it('sets an id', async function () {
       const obj = new GiantDB()
-      return expect(obj.create()).to.eventually.have.property('id')
-        .that.is.a('string')
+      const change = await obj.create()
+      assert.strictEqual(typeof change.id, 'string')
     })
 
     it('does not make the item accessible immediately', async function () {
       const obj = new GiantDB()
-      return await obj.create().then((change) => {
-        return expect(obj.get(change.id)).to.eventually.be.rejected
-      })
+      const change = await obj.create()
+      await assert.rejects(obj.get(change.id))
     })
 
     describe('.commit()', function () {
       it('makes the item accessible', async function () {
         const obj = new GiantDB()
-        return await obj.create().then(async (change) => {
-          return await change.commit().then(() => {
-            return expect(obj.get(change.id)).to.eventually.be.fulfilled
-          })
-        })
+        const change = await obj.create()
+        await change.commit()
+        await assert.doesNotReject(obj.get(change.id))
       })
 
       it('resolves to an Item', async function () {
         const obj = new GiantDB()
-        return await obj.create().then(async (change) => {
-          return await change.commit().then((item) => {
-            return expect(item).to.be.instanceOf(Item)
-              .with.property('id').that.equals(change.id)
-          })
-        })
+        const change = await obj.create()
+        const item = await change.commit()
+        assert.ok(item instanceof Item)
+        assert.strictEqual(item.id, change.id)
       })
     })
   })
 
   describe('#remove()', function () {
-    it('rejects for nonexistent ids', function () {
+    it('rejects for nonexistent ids', async function () {
       const obj = new GiantDB()
-      return expect(obj.remove('foo')).to.eventually.be.rejected
+      await assert.rejects(obj.remove('foo'))
     })
 
     it('makes items inaccessible', async function () {
       const obj = new GiantDB()
-      return await obj.create().then(async (change) => {
-        return await change.commit()
-      }).then(async (item) => {
-        return await obj.remove(item.id).then(() => {
-          return expect(obj.get(item.id)).to.eventually.be.rejected
-        })
-      })
+      const change = await obj.create()
+      const item = await change.commit()
+      await obj.remove(item.id)
+      await assert.rejects(obj.get(item.id))
     })
 
     it('removes items from source', async function () {
@@ -85,61 +74,56 @@ describe('lib/db.ts', function () {
         'foo.json': Buffer.from('{}')
       })
       const obj = new GiantDB(source)
-      return await obj.remove('foo').then(() => {
-        return expect(source.listFiles()).to.eventually.not.include('foo')
-      })
+      await obj.remove('foo')
+      assert.deepStrictEqual(await source.listFiles(), [])
     })
   })
 
   describe('#get()', function () {
-    it('rejects for nonexistent ids', function () {
+    it('rejects for nonexistent ids', async function () {
       const obj = new GiantDB()
-      return expect(obj.get('missing')).to.eventually.be.rejected
+      await assert.rejects(obj.get('missing'))
     })
 
     it('resolves to an Item', async function () {
       const obj = new GiantDB()
-      return await obj.create().then(async (change) => {
-        return await change.commit().then(() => {
-          return expect(obj.get(change.id)).to.eventually.be.instanceOf(Item)
-        })
-      })
+      const change = await obj.create()
+      await change.commit()
+      assert.ok(await obj.get(change.id) instanceof Item)
     })
 
     it('sets the id', async function () {
       const obj = new GiantDB()
-      return await obj.create().then(async (change) => {
-        return await change.commit().then(() => {
-          return expect(obj.get(change.id))
-            .to.eventually.have.property('id').that.equals(change.id)
-        })
-      })
+      const change = await obj.create()
+      await change.commit()
+      const item = await obj.get(change.id)
+      assert.strictEqual(item.id, change.id)
     })
 
-    it('loads items from source', function () {
+    it('loads items from source', async function () {
       const obj = new GiantDB(new MemoryAdapter({
         foo: Buffer.alloc(0),
         'foo.json': Buffer.from('{}')
       }))
-      return expect(obj.get('foo')).to.eventually.be.instanceOf(Item)
+      assert.ok(await obj.get('foo') instanceof Item)
     })
 
-    it('does not load .tmp files', function () {
+    it('does not load .tmp files', async function () {
       const obj = new GiantDB(new MemoryAdapter({
         'foo.tmp': Buffer.alloc(0),
         'foo.json': Buffer.from('{}'),
         'foo.tmp.json': Buffer.from('{}')
       }))
-      return expect(obj.get('foo.tmp')).to.eventually.be.rejected
+      await assert.rejects(obj.get('foo.tmp'))
     })
 
-    it('does not load .json files', function () {
+    it('does not load .json files', async function () {
       const obj = new GiantDB(new MemoryAdapter({
         foo: Buffer.alloc(0),
         'foo.json': Buffer.from('{}'),
         'foo.json.json': Buffer.from('{}')
       }))
-      return expect(obj.get('foo.json')).to.eventually.be.rejected
+      await assert.rejects(obj.get('foo.json'))
     })
 
     it('loads metadata', async function () {
@@ -147,12 +131,8 @@ describe('lib/db.ts', function () {
         foo: Buffer.alloc(0),
         'foo.json': Buffer.from('{"foo": "bar", "baz": 42}')
       }))
-      return await obj.get('foo').then((item) => {
-        return expect(item.metadata).to.deep.equal({
-          foo: 'bar',
-          baz: 42
-        })
-      })
+      const item = await obj.get('foo')
+      assert.deepStrictEqual(item.metadata, { foo: 'bar', baz: 42 })
     })
   })
 
@@ -168,18 +148,18 @@ describe('lib/db.ts', function () {
       void obj.each((item) => {
         ids.push(item.id)
         if (ids.length >= 2) {
-          expect(ids).to.have.members(['foo', 'bar'])
+          assert.deepStrictEqual(ids.sort(), ['bar', 'foo'])
           done()
         }
       })
     })
 
-    it('returns a Promise', function () {
+    it('returns a Promise', async function () {
       const obj = new GiantDB(new MemoryAdapter({
         foo: Buffer.alloc(0),
         'foo.json': Buffer.from('{}')
       }))
-      return expect(obj.each(() => {})).to.eventually.be.fulfilled
+      await assert.doesNotReject(obj.each(() => {}))
     })
 
     it('fulfills the Promise after all iterations are done', async function () {
@@ -190,9 +170,8 @@ describe('lib/db.ts', function () {
         'bar.json': Buffer.from('{}')
       }))
       let iterations = 0
-      return await obj.each(() => ++iterations).then(() => {
-        return expect(iterations).to.equal(2)
-      })
+      await obj.each(() => ++iterations)
+      assert.strictEqual(iterations, 2)
     })
 
     it('awaits Promises returned by the callback', function (done) {
@@ -210,7 +189,7 @@ describe('lib/db.ts', function () {
           await delay(20)
           finished = true
         } else {
-          expect(finished).to.be.true
+          assert.ok(finished)
           done()
         }
       })
@@ -232,7 +211,7 @@ describe('lib/db.ts', function () {
           removed = item.id === 'foo' ? 'bar' : 'foo'
           return obj.remove(removed)
         }
-        expect(item.id).to.not.equal(removed)
+        assert.notStrictEqual(item.id, removed)
       })
     })
   })

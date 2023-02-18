@@ -1,9 +1,6 @@
+import assert from 'assert'
 import { PassThrough } from 'stream'
 import { MiddlewareManager } from '../../src/middleware/manager.js'
-
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-chai.use(chaiAsPromised)
 
 describe('lib/middleware/manager.ts', function () {
   describe('#register()', function () {
@@ -33,9 +30,9 @@ describe('lib/middleware/manager.ts', function () {
       const obj = new MiddlewareManager()
       obj.register({
         transformReadable (str, met, opt, next) {
-          expect(str).to.equal(stream)
-          expect(met).to.equal(meta)
-          expect(opt).to.equal(options)
+          assert.strictEqual(str, stream)
+          assert.strictEqual(met, meta)
+          assert.strictEqual(opt, options)
           next()
           done()
         }
@@ -43,29 +40,26 @@ describe('lib/middleware/manager.ts', function () {
       void obj.transformReadable(stream, meta, options)
     })
 
-    it('ignores middleware missing the method', function () {
+    it('ignores middleware missing the method', async function () {
       const obj = new MiddlewareManager()
       obj.register({})
       obj.register({ transformReadable: null as any })
-      return expect(obj.transformReadable(new PassThrough(), {}, {}))
-        .to.eventually.be.fulfilled
+      await assert.doesNotReject(obj.transformReadable(new PassThrough(), {}, {}))
     })
 
-    it('resolves to a result object', function () {
+    it('resolves to a result object', async function () {
       const stream = new PassThrough()
       const meta = { meta: true }
       const options = { options: true }
 
       const obj = new MiddlewareManager()
-      return expect(obj.transformReadable(stream, meta, options))
-        .to.eventually.be.an('object').that.deep.equals({
-          stream,
-          metadata: meta,
-          metadataChanged: false
-        })
+      const result = await obj.transformReadable(stream, meta, options)
+      assert.strictEqual(result.stream, stream)
+      assert.strictEqual(result.metadata, meta)
+      assert.strictEqual(result.metadataChanged, false)
     })
 
-    it("updates 'stream' and 'metadata'", function () {
+    it("updates 'stream' and 'metadata'", async function () {
       const stream1 = new PassThrough()
       const stream2 = new PassThrough()
       const meta1 = { meta: true }
@@ -75,28 +69,26 @@ describe('lib/middleware/manager.ts', function () {
       const obj = new MiddlewareManager()
       obj.register({
         transformReadable (str, met, opt, next) {
-          expect(str).to.equal(stream1)
-          expect(met).to.equal(meta1)
+          assert.strictEqual(str, stream1)
+          assert.strictEqual(met, meta1)
           next(null, { metadata: meta2, stream: stream2 })
         }
       })
       obj.register({
         transformReadable (str, met, opt, next) {
-          expect(str).to.equal(stream2)
-          expect(met).to.equal(meta2)
+          assert.strictEqual(str, stream2)
+          assert.strictEqual(met, meta2)
           next()
         }
       })
 
-      return expect(obj.transformReadable(stream1, meta1, options))
-        .to.eventually.deep.equal({
-          metadataChanged: true,
-          stream: stream2,
-          metadata: meta2
-        })
+      const result = await obj.transformReadable(stream1, meta1, options)
+      assert.strictEqual(result.stream, stream2)
+      assert.strictEqual(result.metadata, meta2)
+      assert.strictEqual(result.metadataChanged, true)
     })
 
-    it('sets metadataChanged when it was modified', function () {
+    it('sets metadataChanged when it was modified', async function () {
       const stream = new PassThrough()
       const meta = { meta: true }
       const options = { options: true }
@@ -108,30 +100,28 @@ describe('lib/middleware/manager.ts', function () {
         }
       })
 
-      return expect(obj.transformReadable(stream, meta, options))
-        .to.eventually.have.property('metadataChanged').that.is.true
+      const result = await obj.transformReadable(stream, meta, options)
+      assert.strictEqual(result.metadataChanged, true)
     })
 
-    it('rejects when the middleware throws', function () {
+    it('rejects when the middleware throws', async function () {
       const obj = new MiddlewareManager()
       obj.register({
         transformReadable () {
           throw new Error('oops!')
         }
       })
-      return expect(obj.transformReadable(new PassThrough(), {}, {}))
-        .to.eventually.be.rejected
+      await assert.rejects(obj.transformReadable(new PassThrough(), {}, {}))
     })
 
-    it('rejects when the middleware passes an error', function () {
+    it('rejects when the middleware passes an error', async function () {
       const obj = new MiddlewareManager()
       obj.register({
         transformReadable (str, met, opt, next) {
           next(new Error('oops!'))
         }
       })
-      return expect(obj.transformReadable(new PassThrough(), {}, {}))
-        .to.eventually.be.rejected
+      await assert.rejects(obj.transformReadable(new PassThrough(), {}, {}))
     })
   })
 
@@ -155,9 +145,9 @@ describe('lib/middleware/manager.ts', function () {
       const obj = new MiddlewareManager()
       obj.register({
         transformWritable (str, met, opt, next) {
-          expect(str).to.equal(stream)
-          expect(met).to.equal(meta)
-          expect(opt).to.equal(options)
+          assert.strictEqual(str, stream)
+          assert.strictEqual(met, meta)
+          assert.strictEqual(opt, options)
           next()
           done()
         }
@@ -165,29 +155,26 @@ describe('lib/middleware/manager.ts', function () {
       void obj.transformWritable(stream, meta, options)
     })
 
-    it('ignores middleware missing the method', function () {
+    it('ignores middleware missing the method', async function () {
       const obj = new MiddlewareManager()
       obj.register({})
       obj.register({ transformWritable: null as any })
-      return expect(obj.transformWritable(new PassThrough(), {}, {}))
-        .to.eventually.be.fulfilled
+      await assert.doesNotReject(obj.transformWritable(new PassThrough(), {}, {}))
     })
 
-    it('resolves to a result object', function () {
+    it('resolves to a result object', async function () {
       const stream = new PassThrough()
       const meta = { meta: true }
       const options = { options: true }
 
       const obj = new MiddlewareManager()
-      return expect(obj.transformWritable(stream, meta, options))
-        .to.eventually.be.an('object').that.deep.equals({
-          stream,
-          metadata: meta,
-          metadataChanged: false
-        })
+      const result = await obj.transformWritable(stream, meta, options)
+      assert.strictEqual(result.stream, stream)
+      assert.strictEqual(result.metadata, meta)
+      assert.strictEqual(result.metadataChanged, false)
     })
 
-    it("updates 'stream' and 'metadata'", function () {
+    it("updates 'stream' and 'metadata'", async function () {
       const stream1 = new PassThrough()
       const stream2 = new PassThrough()
       const meta1 = { meta: true }
@@ -197,28 +184,26 @@ describe('lib/middleware/manager.ts', function () {
       const obj = new MiddlewareManager()
       obj.register({
         transformWritable (str, met, opt, next) {
-          expect(str).to.equal(stream1)
-          expect(met).to.equal(meta1)
+          assert.strictEqual(str, stream1)
+          assert.strictEqual(met, meta1)
           next(null, { metadata: meta2, stream: stream2 })
         }
       })
       obj.register({
         transformWritable (str, met, opt, next) {
-          expect(str).to.equal(stream2)
-          expect(met).to.equal(meta2)
+          assert.strictEqual(str, stream2)
+          assert.strictEqual(met, meta2)
           next()
         }
       })
 
-      return expect(obj.transformWritable(stream1, meta1, options))
-        .to.eventually.deep.equal({
-          metadataChanged: true,
-          stream: stream2,
-          metadata: meta2
-        })
+      const result = await obj.transformWritable(stream1, meta1, options)
+      assert.strictEqual(result.stream, stream2)
+      assert.strictEqual(result.metadata, meta2)
+      assert.strictEqual(result.metadataChanged, true)
     })
 
-    it('sets metadataChanged when it was modified', function () {
+    it('sets metadataChanged when it was modified', async function () {
       const stream = new PassThrough()
       const meta = { meta: true }
       const options = { options: true }
@@ -230,30 +215,28 @@ describe('lib/middleware/manager.ts', function () {
         }
       })
 
-      return expect(obj.transformWritable(stream, meta, options))
-        .to.eventually.have.property('metadataChanged').that.is.true
+      const result = await obj.transformWritable(stream, meta, options)
+      assert.strictEqual(result.metadataChanged, true)
     })
 
-    it('rejects when the middleware throws', function () {
+    it('rejects when the middleware throws', async function () {
       const obj = new MiddlewareManager()
       obj.register({
         transformWritable () {
           throw new Error('oops!')
         }
       })
-      return expect(obj.transformWritable(new PassThrough(), {}, {}))
-        .to.eventually.be.rejected
+      await assert.rejects(obj.transformWritable(new PassThrough(), {}, {}))
     })
 
-    it('rejects when the middleware passes an error', function () {
+    it('rejects when the middleware passes an error', async function () {
       const obj = new MiddlewareManager()
       obj.register({
         transformWritable (str, met, opt, next) {
           next(new Error('oops!'))
         }
       })
-      return expect(obj.transformWritable(new PassThrough(), {}, {}))
-        .to.eventually.be.rejected
+      await assert.rejects(obj.transformWritable(new PassThrough(), {}, {}))
     })
   })
 })

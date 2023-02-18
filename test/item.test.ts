@@ -1,12 +1,9 @@
+import assert from 'assert'
 import { PassThrough, Readable, Writable } from 'stream'
 import { IOManager } from '../src/iomanager.js'
 import { MemoryAdapter } from 'fs-adapters'
 import { MiddlewareManager } from '../src/middleware/manager.js'
 import { Item } from '../src/item.js'
-
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-chai.use(chaiAsPromised)
 
 /**
  * @returns Mock I/O manager.
@@ -18,13 +15,13 @@ function mockIOManager (): IOManager {
 describe('lib/item.ts', function () {
   it("has property 'id'", function () {
     const obj = new Item('foo', mockIOManager(), {})
-    return expect(obj.id).to.equal('foo')
+    assert.strictEqual(obj.id, 'foo')
   })
 
   it("has property 'metadata'", function () {
     const metadata = { foo: 'bar', baz: 42 }
     const obj = new Item('foo', mockIOManager(), metadata)
-    return expect(obj.metadata).to.equal(metadata)
+    assert.strictEqual(obj.metadata, metadata)
   })
 
   describe('#getReadable()', function () {
@@ -37,7 +34,7 @@ describe('lib/item.ts', function () {
         stream: expected
       })
       const obj = new Item('foo', manager, {})
-      await expect(obj.getReadable()).to.eventually.equal(expected)
+      assert.strictEqual(await obj.getReadable(), expected)
     })
 
     it('passes id, metadata and options to the IO manager', function (done) {
@@ -45,9 +42,9 @@ describe('lib/item.ts', function () {
       const expectedOptions = { options: true }
       const manager = mockIOManager()
       manager.createReadStream = async (id, meta, options) => {
-        expect(id).to.equal('foo')
-        expect(meta).to.equal(metadata)
-        expect(options).to.equal(expectedOptions)
+        assert.strictEqual(id, 'foo')
+        assert.strictEqual(meta, metadata)
+        assert.strictEqual(options, expectedOptions)
         done()
         return {
           metadata: {},
@@ -68,9 +65,8 @@ describe('lib/item.ts', function () {
         stream: new PassThrough()
       })
       const obj = new Item('foo', manager, {})
-      return await obj.getReadable().then(() => {
-        return expect(obj.metadata).to.equal(expected)
-      })
+      await obj.getReadable()
+      assert.strictEqual(obj.metadata, expected)
     })
   })
 
@@ -84,7 +80,7 @@ describe('lib/item.ts', function () {
         stream: expected
       })
       const obj = new Item('foo', manager, {})
-      await expect(obj.getWritable()).to.eventually.equal(expected)
+      assert.strictEqual(await obj.getWritable(), expected)
     })
 
     it('passes id, metadata and options to the IO manager', function (done) {
@@ -92,9 +88,9 @@ describe('lib/item.ts', function () {
       const expectedOptions = { options: true }
       const manager = mockIOManager()
       manager.createWriteStream = async (id, meta, options) => {
-        expect(id).to.equal('foo')
-        expect(meta).to.equal(metadata)
-        expect(options).to.equal(expectedOptions)
+        assert.strictEqual(id, 'foo')
+        assert.strictEqual(meta, metadata)
+        assert.strictEqual(options, expectedOptions)
         done()
         return {
           metadata: {},
@@ -115,9 +111,8 @@ describe('lib/item.ts', function () {
         stream: new PassThrough()
       })
       const obj = new Item('foo', manager, {})
-      return await obj.getWritable().then(() => {
-        return expect(obj.metadata).to.equal(expected)
-      })
+      await obj.getWritable()
+      assert.strictEqual(obj.metadata, expected)
     })
   })
 
@@ -129,8 +124,8 @@ describe('lib/item.ts', function () {
       }
       const manager = mockIOManager()
       manager.writeMetadata = async (id, data) => {
-        expect(id).to.equal('foo')
-        expect(data).to.equal(expected)
+        assert.strictEqual(id, 'foo')
+        assert.strictEqual(data, expected)
         done()
       }
       const obj = new Item('foo', manager, expected)
@@ -139,7 +134,7 @@ describe('lib/item.ts', function () {
 
     it('returns a Promise', async function () {
       const obj = new Item('foo', mockIOManager(), {})
-      await expect(obj.saveMetadata()).to.eventually.be.fulfilled
+      await assert.doesNotReject(obj.saveMetadata())
     })
   })
 })

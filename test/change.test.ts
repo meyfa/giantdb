@@ -1,10 +1,7 @@
+import assert from 'assert'
 import { PassThrough, Writable } from 'stream'
 import { Change } from '../src/change.js'
 import { Item } from '../src/item.js'
-
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-chai.use(chaiAsPromised)
 
 /**
  * @returns A mock committer function.
@@ -17,7 +14,7 @@ describe('lib/change.ts', function () {
   it("has property 'id'", function () {
     const out = new Writable()
     const obj = new Change('foo', out, mockCommitter(), () => {})
-    return expect(obj.id).to.equal('foo')
+    assert.strictEqual(obj.id, 'foo')
   })
 
   describe('#write()', function () {
@@ -33,9 +30,9 @@ describe('lib/change.ts', function () {
   describe('#end()', function () {
     it('does not destroy', function (done) {
       const out = new Writable()
-      const obj = new Change('foo', out, mockCommitter(), () => expect.fail())
+      const obj = new Change('foo', out, mockCommitter(), () => assert.fail())
       obj.on('finish', function () {
-        expect(obj.destroyed).to.be.false
+        assert.strictEqual(obj.destroyed, false)
         done()
       })
       obj.end()
@@ -50,10 +47,10 @@ describe('lib/change.ts', function () {
       void obj.commit()
     })
 
-    it('returns a promise', function () {
+    it('returns a promise', async function () {
       const out = new Writable()
       const obj = new Change('foo', out, mockCommitter(), () => {})
-      return expect(obj.commit()).to.eventually.be.fulfilled
+      await assert.doesNotReject(obj.commit())
     })
 
     it('invokes the committer', function (done) {
@@ -65,17 +62,17 @@ describe('lib/change.ts', function () {
       void obj.commit()
     })
 
-    it("resolves to the committer's return value", function () {
+    it("resolves to the committer's return value", async function () {
       const out = new Writable()
       const obj = new Change('foo', out, () => 42 as any, () => {})
-      return expect(obj.commit()).to.eventually.equal(42)
+      assert.strictEqual(await obj.commit(), 42)
     })
 
-    it('rejects when called twice', function () {
+    it('rejects when called twice', async function () {
       const out = new Writable()
       const obj = new Change('foo', out, mockCommitter(), () => {})
       void obj.commit()
-      return expect(obj.commit()).to.eventually.be.rejectedWith('invalid state')
+      await assert.rejects(obj.commit(), { message: 'invalid state' })
     })
 
     it('rejects when already destroyed', function (done) {
@@ -84,20 +81,19 @@ describe('lib/change.ts', function () {
       })
       const obj = new Change('foo', out, mockCommitter(), () => {})
       obj.on('error', function () {
-        void expect(obj.commit()).to.eventually.be.rejectedWith('invalid state')
-          .notify(done)
+        assert.rejects(obj.commit(), { message: 'invalid state' }).then(done, done)
       })
       obj.end('some data to trigger write error')
     })
 
-    it('rejects when the underlying stream fails', function () {
+    it('rejects when the underlying stream fails', async function () {
       const out = new PassThrough()
       out.end = () => {
         out.emit('error', new Error('oops!'))
         return out
       }
       const obj = new Change('foo', out, mockCommitter(), () => {})
-      return expect(obj.commit()).to.eventually.be.rejectedWith('oops!')
+      await assert.rejects(obj.commit(), { message: 'oops!' })
     })
 
     it('invokes the destroyer when the underlying stream fails', function (done) {
@@ -114,7 +110,7 @@ describe('lib/change.ts', function () {
       const out = new Writable()
       const obj = new Change('foo', out, mockCommitter(), () => {})
       obj.on('finish', function () {
-        void expect(obj.commit()).to.eventually.be.fulfilled.notify(done)
+        assert.doesNotReject(obj.commit()).then(done, done)
       })
       obj.end()
     })
