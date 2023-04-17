@@ -46,7 +46,7 @@
     "c8": "7.13.0",
     "delay": "5.0.0",
     "eslint": "8.38.0",
-    "eslint-plugin-jsdoc": "40.0.0",
+    "eslint-plugin-jsdoc": "41.1.2",
     "mocha": "10.0.0",
     "rimraf": "4.4.1",
     "ts-node": "10.9.1",
