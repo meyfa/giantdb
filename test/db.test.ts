@@ -205,11 +205,11 @@ describe('lib/db.ts', function () {
         'qux.json': Buffer.from('{}')
       }))
       let removed: string | undefined
-      await obj.each((item) => {
+      await obj.each(async (item) => {
         if (removed == null) {
           // pick any item other than the current
           removed = item.id === 'foo' ? 'bar' : 'foo'
-          return obj.remove(removed)
+          return await obj.remove(removed)
         }
         assert.notStrictEqual(item.id, removed)
       })
