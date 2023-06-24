@@ -42,7 +42,7 @@
   "devDependencies": {
     "@meyfa/eslint-config": "3.0.1",
     "@types/mocha": "10.0.1",
-    "@types/node": "16.18.36",
+    "@types/node": "18.16.18",
     "c8": "8.0.0",
     "eslint": "8.43.0",
     "eslint-plugin-jsdoc": "46.2.6",
