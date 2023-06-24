@@ -1,5 +1,5 @@
 import assert from 'assert'
-import delay from 'delay'
+import { setTimeout as delay } from 'node:timers/promises'
 import { MemoryAdapter } from 'fs-adapters'
 import { Change } from '../src/change.js'
 import { Item } from '../src/item.js'
