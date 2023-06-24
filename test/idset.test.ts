@@ -85,11 +85,11 @@ describe('lib/idset.ts', function () {
     it('allows for element removal', async function () {
       const obj = new IdSet(() => ['AB', 'CD', 'EF'])
       let removed: string | undefined
-      await obj.each((id) => {
+      await obj.each(async (id) => {
         if (removed == null) {
           // pick any item other than the current
           removed = id === 'AB' ? 'CD' : 'AB'
-          return obj.remove(removed)
+          return await obj.remove(removed)
         }
         assert.notStrictEqual(id, removed)
       })
