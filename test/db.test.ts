@@ -209,7 +209,8 @@ describe('lib/db.ts', function () {
         if (removed == null) {
           // pick any item other than the current
           removed = item.id === 'foo' ? 'bar' : 'foo'
-          return await obj.remove(removed)
+          await obj.remove(removed)
+          return
         }
         assert.notStrictEqual(item.id, removed)
       })

@@ -8,7 +8,7 @@ import { Item } from './item.js'
 export class Change extends WritableWrapper {
   readonly id: string
   private _committer: (() => Promise<Item>) | undefined
-  private _destroyer: (() => void) | undefined
+  private _destroyer: (() => void | PromiseLike<void>) | undefined
   private _changeFinished: boolean
 
   /**
@@ -30,7 +30,7 @@ export class Change extends WritableWrapper {
 
     this.on('error', () => {
       if (this._destroyer != null) {
-        this._destroyer()
+        void this._destroyer()
         this._committer = undefined
         this._destroyer = undefined
       }

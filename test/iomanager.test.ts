@@ -255,7 +255,7 @@ describe('lib/iomanager.ts', function () {
         if (id === 'foo.json') {
           throw Object.assign(new Error('no permission'), { code: 'EPERM' })
         }
-        return await _oldDelete(id)
+        await _oldDelete(id)
       }
       const obj = new IOManager(adapter, mockMiddlewareManager())
       await assert.rejects(obj.deleteTemporary('foo'))
