@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.0.1](https://github.com/meyfa/giantdb/compare/v4.0.0...v4.0.1) (2023-07-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency writable-wrapper to v4 ([#140](https://github.com/meyfa/giantdb/issues/140)) ([0eff92a](https://github.com/meyfa/giantdb/commit/0eff92af0b197b99c74667d21cfa10dbf815d204))
+* Export types with "export type" for clarity ([#144](https://github.com/meyfa/giantdb/issues/144)) ([9a6e2fe](https://github.com/meyfa/giantdb/commit/9a6e2fe470ca9da3dd26192bb8e5bf7e828d4aa9))
+
 ## [4.0.0](https://github.com/meyfa/giantdb/compare/v3.1.0...v4.0.0) (2023-06-24)
 
 
