@@ -51,6 +51,6 @@
   },
   "dependencies": {
     "fs-adapters": "^7.0.0",
-    "writable-wrapper": "^3.1.0"
+    "writable-wrapper": "^4.0.0"
   }
 }
