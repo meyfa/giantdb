@@ -89,7 +89,8 @@ describe('lib/idset.ts', function () {
         if (removed == null) {
           // pick any item other than the current
           removed = id === 'AB' ? 'CD' : 'AB'
-          return await obj.remove(removed)
+          await obj.remove(removed)
+          return
         }
         assert.notStrictEqual(id, removed)
       })
