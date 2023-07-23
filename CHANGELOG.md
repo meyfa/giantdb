@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.0.2](https://github.com/meyfa/giantdb/compare/v4.0.1...v4.0.2) (2023-07-23)
+
+
+### Bug Fixes
+
+* **deps:** Bump dependencies ([#146](https://github.com/meyfa/giantdb/issues/146)) ([6f1a9ab](https://github.com/meyfa/giantdb/commit/6f1a9ab90fbd789c2eb230aa789b172b09a280ee))
+
+
+### Miscellaneous Chores
+
+* Publish with provenance ([#148](https://github.com/meyfa/giantdb/issues/148)) ([367eba3](https://github.com/meyfa/giantdb/commit/367eba34fd907be614d177092226ade1dce9e64c))
+
 ## [4.0.1](https://github.com/meyfa/giantdb/compare/v4.0.0...v4.0.1) (2023-07-17)
 
 
