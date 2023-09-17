@@ -1,5 +1,5 @@
-import crypto from 'crypto'
-import util from 'util'
+import crypto from 'node:crypto'
+import util from 'node:util'
 import { Adapter, DirectoryAdapter, MemoryAdapter } from 'fs-adapters'
 import { IdSet } from './idset.js'
 import { IOManager } from './iomanager.js'

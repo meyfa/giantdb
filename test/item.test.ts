@@ -1,5 +1,5 @@
-import assert from 'assert'
-import { PassThrough, Readable, Writable } from 'stream'
+import assert from 'node:assert'
+import { PassThrough, Readable, Writable } from 'node:stream'
 import { IOManager } from '../src/iomanager.js'
 import { MemoryAdapter } from 'fs-adapters'
 import { MiddlewareManager } from '../src/middleware/manager.js'

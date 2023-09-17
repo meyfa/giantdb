@@ -1,4 +1,4 @@
-import { Readable, Stream, Writable } from 'stream'
+import { Readable, Stream, Writable } from 'node:stream'
 
 /**
  * Describes a result object as returned by a middleware transform function.

@@ -1,5 +1,5 @@
-import assert from 'assert'
-import { PassThrough, Writable } from 'stream'
+import assert from 'node:assert'
+import { PassThrough, Writable } from 'node:stream'
 import { Change } from '../src/change.js'
 import { Item } from '../src/item.js'
 

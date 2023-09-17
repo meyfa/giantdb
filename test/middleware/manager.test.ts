@@ -1,5 +1,5 @@
-import assert from 'assert'
-import { PassThrough } from 'stream'
+import assert from 'node:assert'
+import { PassThrough } from 'node:stream'
 import { MiddlewareManager } from '../../src/middleware/manager.js'
 
 describe('lib/middleware/manager.ts', function () {

@@ -1,4 +1,4 @@
-import { Stream } from 'stream'
+import { Stream } from 'node:stream'
 import { MiddlewareResult } from './middleware.js'
 
 /**

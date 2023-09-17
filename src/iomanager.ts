@@ -1,7 +1,7 @@
 import { Adapter } from 'fs-adapters'
 import { MiddlewareManager } from './middleware/manager.js'
 import { TransformResult } from './middleware/transformable.js'
-import { Readable, Writable } from 'stream'
+import { Readable, Writable } from 'node:stream'
 
 /**
  * Helper class for I/O operations.

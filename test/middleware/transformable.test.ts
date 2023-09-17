@@ -1,5 +1,5 @@
-import assert from 'assert'
-import { PassThrough } from 'stream'
+import assert from 'node:assert'
+import { PassThrough } from 'node:stream'
 import { MiddlewareTransformable } from '../../src/middleware/transformable.js'
 
 describe('lib/middleware/transformable.ts', function () {

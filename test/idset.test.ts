@@ -1,4 +1,4 @@
-import assert from 'assert'
+import assert from 'node:assert'
 import { setTimeout as delay } from 'node:timers/promises'
 import { IdSet } from '../src/idset.js'
 

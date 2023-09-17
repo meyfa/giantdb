@@ -1,4 +1,4 @@
-import { Readable, Stream, Writable } from 'stream'
+import { Readable, Stream, Writable } from 'node:stream'
 import { MiddlewareTransformable, TransformResult } from './transformable.js'
 import { Middleware, MiddlewareResult, MiddlewareTransformFn } from './middleware.js'
 
