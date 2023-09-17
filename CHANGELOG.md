@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.0.3](https://github.com/meyfa/giantdb/compare/v4.0.2...v4.0.3) (2023-09-17)
+
+
+### Bug Fixes
+
+* Set package.json "type" explicitly to "commonjs" ([#159](https://github.com/meyfa/giantdb/issues/159)) ([b3d5116](https://github.com/meyfa/giantdb/commit/b3d51161015f40ce295b314128b63d0545d89705))
+* Use 'node:' protocol in imports ([#160](https://github.com/meyfa/giantdb/issues/160)) ([1981059](https://github.com/meyfa/giantdb/commit/1981059d8dcb6d9555ce538e180f5ad4fd047b0b))
+
 ## [4.0.2](https://github.com/meyfa/giantdb/compare/v4.0.1...v4.0.2) (2023-07-23)
 
 
