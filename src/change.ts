@@ -1,5 +1,5 @@
 import WritableWrapper from 'writable-wrapper'
-import { Writable } from 'stream'
+import { Writable } from 'node:stream'
 import { Item } from './item.js'
 
 /**

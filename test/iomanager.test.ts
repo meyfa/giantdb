@@ -1,6 +1,6 @@
-import assert from 'assert'
+import assert from 'node:assert'
 import { MemoryAdapter } from 'fs-adapters'
-import { PassThrough } from 'stream'
+import { PassThrough } from 'node:stream'
 import { MiddlewareManager } from '../src/middleware/manager.js'
 import { IOManager } from '../src/iomanager.js'
 

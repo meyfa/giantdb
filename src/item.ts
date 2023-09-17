@@ -1,6 +1,6 @@
 import { IOManager } from './iomanager.js'
 import { TransformResult } from './middleware/transformable.js'
-import { Readable, Stream, Writable } from 'stream'
+import { Readable, Stream, Writable } from 'node:stream'
 
 /**
  * A single database item.
