@@ -9,14 +9,14 @@ import { IOManager } from '../src/iomanager.js'
  */
 function mockMiddlewareManager (): MiddlewareManager {
   const manager = new MiddlewareManager()
-  manager.transformReadable = async (stream, meta/*, options */) => {
+  manager.transformReadable = async (stream, meta/* , options */) => {
     return {
       stream,
       metadata: meta,
       metadataChanged: false
     }
   }
-  manager.transformWritable = async (stream, meta/*, options */) => {
+  manager.transformWritable = async (stream, meta/* , options */) => {
     return {
       stream,
       metadata: meta,
@@ -34,7 +34,7 @@ describe('lib/iomanager.ts', function () {
       })
       const obj = new IOManager(adapter, mockMiddlewareManager())
       const { stream } = await obj.createReadStream('foo', {}, {})
-      await new Promise<void>(resolve => {
+      await new Promise<void>((resolve) => {
         stream.on('data', (chunk: Buffer) => {
           assert.strictEqual(chunk.toString(), 'test')
           resolve()
@@ -60,8 +60,8 @@ describe('lib/iomanager.ts', function () {
       middlewareManager.transformReadable = async function (stream, meta, opts) {
         assert.strictEqual(meta, meta1)
         assert.strictEqual(opts, options)
-        await new Promise<void>(resolve => {
-          stream.on('data', chunk => {
+        await new Promise<void>((resolve) => {
+          stream.on('data', (chunk) => {
             assert.ok(Buffer.from('test').equals(chunk))
             resolve()
           })
@@ -98,7 +98,7 @@ describe('lib/iomanager.ts', function () {
       const adapter = new MemoryAdapter()
       const obj = new IOManager(adapter, mockMiddlewareManager())
       const { stream } = await obj.createWriteStream('foo', {}, {})
-      const promise = new Promise<void>(resolve => {
+      const promise = new Promise<void>((resolve) => {
         stream.on('finish', () => resolve())
       })
       stream.end('passTest')
@@ -153,7 +153,7 @@ describe('lib/iomanager.ts', function () {
       const adapter = new MemoryAdapter()
       const obj = new IOManager(adapter, mockMiddlewareManager())
       const stream = await obj.createTemporary('foo', {})
-      const promise = new Promise<void>(resolve => {
+      const promise = new Promise<void>((resolve) => {
         stream.on('finish', () => resolve())
       })
       stream.end('passTest')

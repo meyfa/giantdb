@@ -108,6 +108,7 @@ export class IOManager {
   async deleteTemporary (id: string): Promise<void> {
     await Promise.all([
       this._adapter.delete(id + '.tmp'),
+      // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
       this._adapter.delete(id + '.json').catch((err) => {
         // ignore missing metadata file
         if (err.code !== 'ENOENT') {

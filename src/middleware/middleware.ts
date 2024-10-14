@@ -13,7 +13,7 @@ export interface MiddlewareResult<S extends Stream> {
 /**
  * Call this function to complete the middleware transform.
  */
-export type MiddlewareNextFn<S extends Stream> = (err?: Error | undefined | null, result?: MiddlewareResult<S>) => void
+export type MiddlewareNextFn<S extends Stream> = (err?: Error | null, result?: MiddlewareResult<S>) => void
 
 /**
  * A transform function as part of a middleware.

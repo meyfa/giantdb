@@ -13,12 +13,12 @@ function mockIOManager (): IOManager {
 }
 
 describe('lib/item.ts', function () {
-  it("has property 'id'", function () {
+  it('has property "id"', function () {
     const obj = new Item('foo', mockIOManager(), {})
     assert.strictEqual(obj.id, 'foo')
   })
 
-  it("has property 'metadata'", function () {
+  it('has property "metadata"', function () {
     const metadata = { foo: 'bar', baz: 42 }
     const obj = new Item('foo', mockIOManager(), metadata)
     assert.strictEqual(obj.metadata, metadata)
@@ -117,7 +117,7 @@ describe('lib/item.ts', function () {
   })
 
   describe('#saveMetadata()', function () {
-    it("calls the I/O manager's 'writeMetadata' method", function (done) {
+    it('calls the I/O manager\'s "writeMetadata" method', function (done) {
       const expected = {
         foo: 'bar',
         baz: 42
