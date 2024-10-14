@@ -51,7 +51,7 @@ export class GiantDB {
 
     this._idSet = new IdSet(async () => {
       const files: string[] = await this._adapter.listFiles()
-      return files.filter(fileName => {
+      return files.filter((fileName) => {
         // ignore non-committed files
         return !fileName.includes('.tmp') && !fileName.includes('.json')
       })

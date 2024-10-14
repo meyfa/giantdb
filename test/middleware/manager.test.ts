@@ -11,7 +11,7 @@ describe('lib/middleware/manager.ts', function () {
   })
 
   describe('#transformReadable()', function () {
-    it("calls the middleware's method", function (done) {
+    it('calls the middleware\'s method', function (done) {
       const obj = new MiddlewareManager()
       obj.register({
         transformReadable (stream, meta, options, next) {
@@ -59,7 +59,7 @@ describe('lib/middleware/manager.ts', function () {
       assert.strictEqual(result.metadataChanged, false)
     })
 
-    it("updates 'stream' and 'metadata'", async function () {
+    it('updates "stream" and "metadata"', async function () {
       const stream1 = new PassThrough()
       const stream2 = new PassThrough()
       const meta1 = { meta: true }
@@ -126,7 +126,7 @@ describe('lib/middleware/manager.ts', function () {
   })
 
   describe('#transformWritable()', function () {
-    it("calls the middleware's method", function (done) {
+    it('calls the middleware\'s method', function (done) {
       const obj = new MiddlewareManager()
       obj.register({
         transformWritable (stream, meta, options, next) {
@@ -174,7 +174,7 @@ describe('lib/middleware/manager.ts', function () {
       assert.strictEqual(result.metadataChanged, false)
     })
 
-    it("updates 'stream' and 'metadata'", async function () {
+    it('updates "stream" and "metadata"', async function () {
       const stream1 = new PassThrough()
       const stream2 = new PassThrough()
       const meta1 = { meta: true }

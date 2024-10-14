@@ -61,7 +61,7 @@ export class MiddlewareManager {
    * @returns A Promise that resolves to a transformation result.
    */
   async transformReadable (stream: Readable, meta: object, options?: object): Promise<TransformResult<Readable>> {
-    return await this._transform(mw => mw.transformReadable, stream, meta, options)
+    return await this._transform((mw) => mw.transformReadable, stream, meta, options)
   }
 
   /**
@@ -79,7 +79,7 @@ export class MiddlewareManager {
    * @returns A Promise that resolves to a transformation result.
    */
   async transformWritable (stream: Writable, meta: object, options?: object): Promise<TransformResult<Writable>> {
-    return await this._transform(mw => mw.transformWritable, stream, meta, options)
+    return await this._transform((mw) => mw.transformWritable, stream, meta, options)
   }
 
   private async _transform<S extends Stream> (fnAccessor: TransformAccessor<S>, stream: S, meta: object, options?: object): Promise<TransformResult<S>> {

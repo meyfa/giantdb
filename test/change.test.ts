@@ -11,7 +11,7 @@ function mockCommitter (): () => Promise<Item> {
 }
 
 describe('lib/change.ts', function () {
-  it("has property 'id'", function () {
+  it('has property "id"', function () {
     const out = new Writable()
     const obj = new Change('foo', out, mockCommitter(), () => {})
     assert.strictEqual(obj.id, 'foo')
@@ -62,7 +62,7 @@ describe('lib/change.ts', function () {
       void obj.commit()
     })
 
-    it("resolves to the committer's return value", async function () {
+    it('resolves to the committer\'s return value', async function () {
       const out = new Writable()
       const obj = new Change('foo', out, () => 42 as any, () => {})
       assert.strictEqual(await obj.commit(), 42)
@@ -81,7 +81,7 @@ describe('lib/change.ts', function () {
       })
       const obj = new Change('foo', out, mockCommitter(), () => {})
       obj.on('error', function () {
-        assert.rejects(obj.commit(), { message: 'invalid state' }).then(done, done)
+        assert.rejects(obj.commit(), { message: 'invalid state' }).then(done, (err: unknown) => done(err))
       })
       obj.end('some data to trigger write error')
     })
@@ -110,7 +110,7 @@ describe('lib/change.ts', function () {
       const out = new Writable()
       const obj = new Change('foo', out, mockCommitter(), () => {})
       obj.on('finish', function () {
-        assert.doesNotReject(obj.commit()).then(done, done)
+        assert.doesNotReject(obj.commit()).then(done, (err: unknown) => done(err))
       })
       obj.end()
     })
