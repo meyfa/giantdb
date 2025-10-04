@@ -1,8 +1,6 @@
 # GiantDB
 
 [![CI](https://github.com/meyfa/giantdb/actions/workflows/main.yml/badge.svg)](https://github.com/meyfa/giantdb/actions/workflows/main.yml)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/39ebc35a4b32350a0191/test_coverage)](https://codeclimate.com/github/meyfa/giantdb/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/39ebc35a4b32350a0191/maintainability)](https://codeclimate.com/github/meyfa/giantdb/maintainability)
 
 GiantDB is a large object store, written entirely in TypeScript. It provides
 managed data storage with a minimal, yet powerful programming interface.
