@@ -47,7 +47,7 @@
     "eslint": "9.39.4",
     "mocha": "11.7.6",
     "ts-node": "10.9.2",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   },
   "dependencies": {
     "fs-adapters": "^7.0.1",
